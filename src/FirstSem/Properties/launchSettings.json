@@ -2,7 +2,7 @@
   "profiles": {
     "FirstSem": {
       "commandName": "Project",
-      "commandLineArgs": "--asd"
+      "commandLineArgs": "--indiceslesserx 10"
     }
   }
 }

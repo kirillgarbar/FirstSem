@@ -39,10 +39,17 @@ let indicesNotFromRangeXY (x, y, a:array<int>) =
     r
 
 let swapFS (a:array<int>) =
+    a.[0] <- a.[0] + a.[1]
+    a.[1] <- a.[0] - a.[1]
+    a.[0] <- a.[0] - a.[1]
+    a
+  
+
+let swapTwoByIndex (i, j, a:array<int>) =
     try
-        a.[0] <- a.[0] + a.[1]
-        a.[1] <- a.[0] - a.[1]
-        a.[0] <- a.[0] - a.[1]
+        a.[i] <- a.[i] + a.[j]
+        a.[j] <- a.[i] - a.[j]
+        a.[i] <- a.[i] - a.[j]
         a
     with
     | :? IndexOutOfRangeException as ex ->
