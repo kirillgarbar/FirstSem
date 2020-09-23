@@ -15,25 +15,38 @@ let calculateShortly x =
     r*t + t + 1
 
 let indicesLesserX (x, a:array<int>) =
-    let mutable r = ""
+    let mutable c = 0
     for i = 0 to a.Length - 1 do
-        if a.[i] < x then r <- r + i.ToString() + " "
+        if a.[i] < x then c <- c + 1
+    let r = Array.zeroCreate c
+    c <- 0
+    for i = 0 to a.Length - 1 do
+        if a.[i] < x then
+            r.[c] <- i
+            c <- c + 1
     r
 
 let indicesNotFromRangeXY (x, y, a:array<int>) =
-    let mutable r = ""
+    let mutable c = 0
     for i = 0 to a.Length - 1 do
-        if a.[i] < x  || a.[i] > y then r <- r + i.ToString() + " "
+        if a.[i] < x || a.[i] > y then c <- c + 1
+    let r = Array.zeroCreate c
+    c <- 0
+    for i = 0 to a.Length - 1 do
+        if a.[i] < x || a.[i] > y then
+            r.[c] <- i
+            c <- c + 1
     r
 
 let swapFS (a:array<int>) =
-    a.[0] <- a.[0] + a.[1]
-    a.[1] <- a.[0] - a.[1]
-    a.[0] <- a.[0] - a.[1]
-    a
+    try
+        a.[0] <- a.[0] + a.[1]
+        a.[1] <- a.[0] - a.[1]
+        a.[0] <- a.[0] - a.[1]
+        a
+    with
+    | :? IndexOutOfRangeException as ex ->
+        printfn "%s" ex.Message
+        a
 
-let swapTwoByIndex (i, j, a:array<int>) =
-    a.[i] <- a.[i] + a.[j]
-    a.[j] <- a.[i] - a.[j]
-    a.[i] <- a.[i] - a.[j]
-    a
+
