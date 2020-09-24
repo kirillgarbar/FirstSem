@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FirstSem": {
+      "commandName": "Project",
+      "commandLineArgs": "--indiceslesserx 10"
+    }
+  }
+}

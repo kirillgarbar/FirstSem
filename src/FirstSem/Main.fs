@@ -1,88 +1,63 @@
 namespace FirstSem
 
-open System.Reflection
-
-module AssemblyInfo =
-
-    let metaDataValue (mda: AssemblyMetadataAttribute) = mda.Value
-
-    let getMetaDataAttribute (assembly: Assembly) key =
-        assembly.GetCustomAttributes(typedefof<AssemblyMetadataAttribute>)
-        |> Seq.cast<AssemblyMetadataAttribute>
-        |> Seq.find (fun x -> x.Key = key)
-
-    let getReleaseDate assembly =
-        "ReleaseDate"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let getGitHash assembly =
-        "GitHash"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let getVersion assembly =
-        "AssemblyVersion"
-        |> getMetaDataAttribute assembly
-        |> metaDataValue
-
-    let assembly = lazy (Assembly.GetEntryAssembly())
-
-    let printVersion() =
-        let version = assembly.Force().GetName().Version
-        printfn "%A" version
-
-    let printInfo() =
-        let assembly = assembly.Force()
-        let name = assembly.GetName()
-        let version = assembly.GetName().Version
-        let releaseDate = getReleaseDate assembly
-        let githash = getGitHash assembly
-        printfn "%s - %A - %s - %s" name.Name version releaseDate githash
-
-module Say =
-    open System
-
-    let nothing name = name |> ignore
-
-    let hello name = sprintf "Hello %s" name
-
-    let colorizeIn color str =
-        let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- (Enum.Parse(typedefof<ConsoleColor>, color) :?> ConsoleColor)
-        printfn "%s" str
-        Console.ForegroundColor <- oldColor
+open System
 
 module Main =
     open Argu
-
     type CLIArguments =
-        | Info
-        | Version
-        | Favorite_Color of string // Look in App.config
-        | [<MainCommand>] Hello of string
-        interface IArgParserTemplate with
+        | CalculateNaively of x:int
+        | CalculateShortly of x:int
+        | IndicesLesserX of len:int
+        | IndicesNotFromRangeXY of len:int
+        | SwapFS
+        | SwapTwoByIndex of len:int
+        interface IArgParserTemplate with 
             member s.Usage =
                 match s with
-                | Info -> "More detailed information"
-                | Version -> "Version of application"
-                | Favorite_Color _ -> "Favorite color"
-                | Hello _ -> "Who to say hello to"
-
+                | CalculateNaively _ -> "Calculates X^4+x^3+x^2+x^1+1 (Task 1)"
+                | CalculateShortly _ -> "Calculates X^4+x^3+x^2+x^1+1 (Task 2)"
+                | IndicesLesserX _ -> "Displays indices of array elements that are lesser than X, <len> stands for the length of the generated array"
+                | IndicesNotFromRangeXY _ -> "Displays indices of array elements that are lesser than X or greater than Y, <len> stands for the length of the generated array"
+                | SwapFS _ -> "Generates random array of two elements and swaps their positions"
+                | SwapTwoByIndex _ -> "Generates random array of given length (<len>) and swaps two elements with indices i and j"
     [<EntryPoint>]
     let main (argv: string array) =
-        let parser = ArgumentParser.Create<CLIArguments>(programName = "FirstSem")
-        let results = parser.Parse(argv)
-        if results.Contains Version then
-            AssemblyInfo.printVersion()
-        elif results.Contains Info then
-            AssemblyInfo.printInfo()
-        elif results.Contains Hello then
-            match results.TryGetResult Hello with
-            | Some v ->
-                let color = results.GetResult Favorite_Color
-                Say.hello v |> Say.colorizeIn color
-            | None -> parser.PrintUsage() |> printfn "%s"
-        else
-            parser.PrintUsage() |> printfn "%s"
-        0
+        try
+            let parser = ArgumentParser.Create<CLIArguments>(programName = "FirstSem")
+            let results = parser.Parse(argv)
+            match parser.ParseCommandLine argv with
+            | p when p.Contains(CalculateNaively) -> printfn "%i" (HW2.calculateNaively (p.GetResult(CalculateNaively)))
+            | p when p.Contains(CalculateShortly) -> printfn "%i" (HW2.calculateShortly (p.GetResult(CalculateShortly)))
+            | p when p.Contains(IndicesLesserX) ->
+                let a = HW2.genRandomArray(p.GetResult(IndicesLesserX))
+                printfn "%A" a
+                printfn "Enter X: "
+                let x = Console.ReadLine() |> int
+                printfn "%A" (HW2.indicesLesserX(x, a))
+            | p when p.Contains(IndicesNotFromRangeXY) ->
+                let a = HW2.genRandomArray(p.GetResult(IndicesNotFromRangeXY))
+                printfn "%A" a
+                printfn "Enter X: "
+                let x = Console.ReadLine() |> int
+                printfn "Enter Y: "
+                let y = Console.ReadLine() |> int
+                printfn "%A" (HW2.indicesNotFromRangeXY(x, y, a))
+            | p when p.Contains(SwapFS) ->
+                let a = HW2.genRandomArray(2)
+                printfn "%A" a
+                printfn "%A" (HW2.swapFS(a))
+            | p when p.Contains(SwapTwoByIndex) ->
+                let a = HW2.genRandomArray(p.GetResult(SwapTwoByIndex))
+                printfn "%A" a
+                printfn "Enter i: "
+                let i = Console.ReadLine() |> int
+                printfn "Enter j: "
+                let j = Console.ReadLine() |> int
+                printfn "%A" (HW2.swapTwoByIndex(i, j, a))
+            | _ ->
+                printfn "%s" (parser.PrintUsage())
+            0
+        with
+        | :? ArguParseException as ex ->
+            printfn "%s" ex.Message
+            1
