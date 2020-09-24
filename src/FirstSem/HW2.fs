@@ -44,7 +44,6 @@ let swapFS (a:array<int>) =
     a.[0] <- a.[0] - a.[1]
     a
   
-
 let swapTwoByIndex (i, j, a:array<int>) =
     try
         a.[i] <- a.[i] + a.[j]
@@ -55,5 +54,3 @@ let swapTwoByIndex (i, j, a:array<int>) =
     | :? IndexOutOfRangeException as ex ->
         printfn "%s" ex.Message
         a
-
-

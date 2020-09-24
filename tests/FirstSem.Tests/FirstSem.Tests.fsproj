@@ -7,7 +7,6 @@
     <ItemGroup>
         <Compile Include="Tests HW2.fs" />
         <Compile Include="AssemblyInfo.fs" />
-        <Compile Include="Tests.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

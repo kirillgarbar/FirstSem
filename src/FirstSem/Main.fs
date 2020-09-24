@@ -14,8 +14,8 @@ module Main =
         interface IArgParserTemplate with 
             member s.Usage =
                 match s with
-                | CalculateNaively _ -> "Calculates X^4+x^3+x^2+x^1+1 (Task 1)"
-                | CalculateShortly _ -> "Calculates X^4+x^3+x^2+x^1+1 (Task 2)"
+                | CalculateNaively _ -> "Calculates x^4+x^3+x^2+x^1+1 (Task 1)"
+                | CalculateShortly _ -> "Calculates x^4+x^3+x^2+x^1+1 (Task 2)"
                 | IndicesLesserX _ -> "Displays indices of array elements that are lesser than X, <len> stands for the length of the generated array"
                 | IndicesNotFromRangeXY _ -> "Displays indices of array elements that are lesser than X or greater than Y, <len> stands for the length of the generated array"
                 | SwapFS _ -> "Generates random array of two elements and swaps their positions"
