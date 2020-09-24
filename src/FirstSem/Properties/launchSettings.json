@@ -2,7 +2,7 @@
   "profiles": {
     "FirstSem": {
       "commandName": "Project",
-      "commandLineArgs": "--indiceslesserx 10"
+      "commandLineArgs": "--swaptwobyindex 10"
     }
   }
 }

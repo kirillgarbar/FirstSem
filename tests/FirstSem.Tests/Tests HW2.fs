@@ -5,7 +5,8 @@ open FirstSem
 
 [<Tests>]
 let tests =
-    testList "Tests fpr HW2"[
+    testList "Tests fpr HW2"
+    [
         testCase "Taks 1.1 X = 0" <| fun _ ->
             Expect.equal 1 (HW2.calculateNaively(0)) "Value should be 1"
         testCase "Taks 1.2 X is negative" <| fun _ ->
