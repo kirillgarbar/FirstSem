@@ -5,8 +5,8 @@ open FirstSem
 
 [<Tests>]
 let tests =
-    testList "Tests fpr HW2"
-    [
+    testList "Tests for HW2" [
+
         testCase "Taks 1.1 X = 0" <| fun _ ->
             Expect.equal 1 (HW2.calculateNaively(0)) "Value should be 1"
         testCase "Taks 1.2 X is negative" <| fun _ ->
@@ -54,4 +54,6 @@ let tests =
             Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex(1, 3, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
         testCase "Taks 6.2 i is greater then j" <| fun _ ->
             Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex(3, 1, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
+        testCase "Taks 6.3 index out of bounds check" <| fun _ ->
+            Expect.equal [| 1; 2; 3; 4; 5 |] (HW2.swapTwoByIndex(10, 1, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 2; 3; 4; 5 |] if exception is throrwn"
         ]
