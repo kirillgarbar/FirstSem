@@ -5,7 +5,6 @@
         <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-    	<Compile Include="TestsHW3.fs" />
         <Compile Include="TestsHW2.fs" />
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Main.fs" />
