@@ -11,6 +11,12 @@ module Main =
         | IndicesNotFromRangeXY of len:int
         | SwapFS
         | SwapTwoByIndex of len:int
+        | FibRec of n:int
+        | FibIt of n:int
+        | FibTailRec of n:int
+        | NaiveFibMatrix of n:int
+        | LogFibMatrix of n:int
+        | AllFib of n:int
         interface IArgParserTemplate with 
             member s.Usage =
                 match s with
@@ -20,6 +26,12 @@ module Main =
                 | IndicesNotFromRangeXY _ -> "Displays indices of array elements that are lesser than X or greater than Y, <len> stands for the length of the generated array"
                 | SwapFS _ -> "Generates random array of two elements and swaps their positions"
                 | SwapTwoByIndex _ -> "Generates random array of given length (<len>) and swaps two elements with indices i and j"
+                | FibRec _ -> "Calculates fib number with index N by recursion"
+                | FibIt _ -> "Calculates fib number with index N by iterations"
+                | FibTailRec _ -> "Calculates fib number with index N by tail recursion"
+                | NaiveFibMatrix _ -> "Calculates fib number with index N by naively multiplying matrices"
+                | LogFibMatrix _ -> "Calculates fib number with index N by multiplying matrices for log2(N) operations"
+                | AllFib _ -> "Displays all fib numbers with indices from 0 to N"
     [<EntryPoint>]
     let main (argv: string array) =
         try
@@ -54,6 +66,18 @@ module Main =
                 printfn "Enter j: "
                 let j = Console.ReadLine() |> int
                 printfn "%A" (HW2.swapTwoByIndex(i, j, a))
+            | p when p.Contains(FibRec) ->
+                printfn "%A" (HW3.fibRec(p.GetResult(FibRec)))
+            | p when p.Contains(FibIt) ->
+                printfn "%A" (HW3.fibIt(p.GetResult(FibIt)))
+            | p when p.Contains(FibTailRec) ->
+                printfn "%A" (HW3.fibTailRec(p.GetResult(FibTailRec)))
+            | p when p.Contains(NaiveFibMatrix) ->
+                printfn "%A" (HW3.naiveFibMatrix(p.GetResult(NaiveFibMatrix)))
+            | p when p.Contains(LogFibMatrix) ->
+                printfn "%A" (HW3.logFibMatrix(p.GetResult(LogFibMatrix)))
+            | p when p.Contains(AllFib) ->
+                printfn "%A" (HW3.allFib(p.GetResult(AllFib)))
             | _ ->
                 printfn "%s" (parser.PrintUsage())
             0
