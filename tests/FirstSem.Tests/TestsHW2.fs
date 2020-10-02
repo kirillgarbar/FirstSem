@@ -1,4 +1,4 @@
-module Tests_HW2
+module TestsHW2
 
 open Expecto
 open FirstSem
