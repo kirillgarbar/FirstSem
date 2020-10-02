@@ -13,6 +13,8 @@ let tests =
 
         testCase "Multiplying matrices test. Empty matrix given" <| fun _ ->
             Expect.throws (fun _ -> (mulMat ([|  |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
+        testCase "Multiplying matrices test. Wrong size of matrices" <| fun _ ->
+            Expect.throws (fun _ -> (mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) ([| [| 0; 1 |]; [| 1; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
         testCase "Multiplying matrices test. Common case" <| fun _ ->
             Expect.sequenceEqual (mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) [| [| 1; 1 |]; [| 1; 2 |] |] "[| 1; 1 |]; [| 1; 2 |] was waited"
 

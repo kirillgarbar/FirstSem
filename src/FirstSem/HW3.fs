@@ -12,6 +12,9 @@ let mulMat (a: int [] []) (b: int [] []) =
         if a.Length = 0 || b.Length = 0 || a.[0].Length = 0 || b.[0].Length = 0
         then
             failwith "Matrices should not be empty"
+        elif a.[0].Length <> b.Length
+        then
+            failwith "The number of rows in a is not equal to the number of columns in b"       
         else
             let m = buildMat (a.Length) (b.[0].Length)
             for i = 0 to a.Length - 1 do
