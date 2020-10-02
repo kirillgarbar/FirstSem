@@ -6,6 +6,21 @@ open HW3
 [<Tests>]
 let tests =
     testList "Tests for HW3" [
+        testCase "Build matrix test. Negative numbers given" <| fun _ ->
+            Expect.throws (fun _ -> buildMat -1 2 |> ignore) "Exception should be raised"
+        testCase "Build matrix test. Common case" <| fun _ ->
+            Expect.sequenceEqual (buildMat 3 2) [| [| 0; 0 |]; [| 0; 0 |]; [| 0; 0 |] |] "Matrix 3x2 was waited"
+
+        testCase "Multiplying matrices test. Empty matrix given" <| fun _ ->
+            Expect.throws (fun _ -> (mulMat ([|  |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
+        testCase "Multiplying matrices test. Common case" <| fun _ ->
+            Expect.sequenceEqual (mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) [| [| 1; 1 |]; [| 1; 2 |] |] "[| 1; 1 |]; [| 1; 2 |] was waited"
+
+        testCase "Pow matrix test. Empty matrix given" <| fun _ ->
+            Expect.throws (fun _ -> (powMat ([|  |]) 2) |> ignore) "Exception should be raised"
+        testCase "Pow matrix test. Common case" <| fun _ ->
+            Expect.sequenceEqual (powMat ([| [| 0; 1 |]; [| 1; 1 |] |]) 2) [| [| 1; 1 |]; [| 1; 2 |] |] "[| 1; 1 |]; [| 1; 2 |] was waited"
+
         testCase "Task 1.1 Negative number given" <| fun _ ->
             Expect.throws (fun _ -> fibRec -1 |> ignore) "Exception should be raised"
         testCase "Task 1.2 Common case" <| fun _ ->
