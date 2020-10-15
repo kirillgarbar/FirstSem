@@ -1,12 +1,25 @@
 module HW3
 
-let buildMat a b =
+let mat a b =
     if a < 0 || b < 0
     then
         failwith "Size of matrix must be positive"
     else
         let m = Array.init a (fun _ -> Array.create b 0)
         m
+
+let fibMat =
+    let m = mat 2 2
+    m.[0].[1] <- 1
+    m.[1].[0] <- 1
+    m.[1].[1] <- 1
+    m
+
+let identMat n =
+    let m = mat n n
+    for i = 0 to n - 1 do
+        m.[i].[i] <- 1
+    m
 
 let mulMat (a: int [] []) (b: int [] []) =
         if a.Length = 0 || b.Length = 0 || a.[0].Length = 0 || b.[0].Length = 0
@@ -16,7 +29,7 @@ let mulMat (a: int [] []) (b: int [] []) =
         then
             failwith "The number of rows in a is not equal to the number of columns in b"       
         else
-            let m = buildMat (a.Length) (b.[0].Length)
+            let m = mat (a.Length) (b.[0].Length)
             for i = 0 to a.Length - 1 do
                 for j = 0 to b.[0].Length - 1 do
                     for k = 0 to a.[0].Length - 1 do
@@ -24,9 +37,15 @@ let mulMat (a: int [] []) (b: int [] []) =
             m
 
 let powMat (a: int [] []) p =
-    if a.Length = 0 || a.[0].Length = 0
+    if a.Length <> a.[0].Length
     then
-        failwith "Matrix should not be empty"
+        failwith "The number of rows is not equal to the number of columns"
+    elif p < 0
+    then
+        failwith "Power should be positive"
+    elif p = 0
+    then
+        identMat a.Length
     else
         let mutable r = a
         for i = 2 to p do
@@ -81,10 +100,8 @@ let naiveFibMatrix n =
     then
         1
     else
-        let mutable m = [| [| 0; 1 |]; [| 1; 1 |] |]
-        for i = 2 to n do
-            m <- (mulMat m [| [| 0; 1 |]; [| 1; 1 |] |])
-        m.[1].[1]
+        let m = fibMat
+        (powMat m n).[1].[1]
 
 let logFibMatrix n =
     if n < 0
@@ -94,13 +111,13 @@ let logFibMatrix n =
         let rec go n =
             if n = 0 || n = 1
             then
-                [| [| 0; 1 |]; [| 1; 1 |] |]
+                fibMat
             else
                 if n % 2 = 0
                 then
                     powMat (go (n/2)) 2
                 else
-                    mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) (powMat (go ((n - 1)/2)) 2)
+                    mulMat (fibMat) (powMat (go ((n - 1)/2)) 2)
         (go n).[1].[1]
 
 let allFib n =
@@ -108,7 +125,23 @@ let allFib n =
     then
         failwith "Number must not be negative"
     else
+        if n = 0
+        then
+            [| 1 |]
+        elif n = 1
+        then
+            [| 1; 1 |]
+        else
         let a = Array.zeroCreate (n + 1)
-        for i = 0 to n do
-            a.[i] <- fibTailRec i
+        a.[0] <- 1
+        a.[1] <- 1
+        let mutable x = 0
+        let mutable fib1 = 1
+        let mutable fib2 = 1
+        for i = 2 to n do
+            x <- fib1 + fib2
+            fib2 <- fib1
+            fib1 <- x
+            a.[i] <- x
         a
+        
