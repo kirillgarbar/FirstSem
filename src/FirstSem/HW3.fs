@@ -21,7 +21,7 @@ let identMat n =
         m.[i].[i] <- 1
     m
 
-let mulMat (a: int [] []) (b: int [] []) =
+let mulMat (a:int [] []) (b:int [] []) =
         if a.Length = 0 || b.Length = 0 || a.[0].Length = 0 || b.[0].Length = 0
         then
             failwith "Matrices should not be empty"
@@ -36,7 +36,7 @@ let mulMat (a: int [] []) (b: int [] []) =
                         m.[i].[j] <- m.[i].[j] + a.[i].[k] * b.[k].[j]
             m
 
-let powMat (a: int [] []) p =
+let powMat (a:int [] []) p =
     if a.Length <> a.[0].Length
     then
         failwith "The number of rows is not equal to the number of columns"
@@ -125,23 +125,8 @@ let allFib n =
     then
         failwith "Number must not be negative"
     else
-        if n = 0
-        then
-            [| 1 |]
-        elif n = 1
-        then
-            [| 1; 1 |]
-        else
-        let a = Array.zeroCreate (n + 1)
-        a.[0] <- 1
-        a.[1] <- 1
-        let mutable x = 0
-        let mutable fib1 = 1
-        let mutable fib2 = 1
+        let a = Array.create (n + 1) 1
         for i = 2 to n do
-            x <- fib1 + fib2
-            fib2 <- fib1
-            fib1 <- x
-            a.[i] <- x
+            a.[i] <- a.[i-1] + a.[i-2]
         a
         
