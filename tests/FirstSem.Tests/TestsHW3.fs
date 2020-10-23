@@ -26,12 +26,12 @@ let tests =
         testCase "Multiplying matrices test. Common case" <| fun _ ->
             Expect.sequenceEqual (mulMat ([| [| 1; 4 |]; [| 8; 8 |] |]) ([| [| 1; 9 |]; [| 1; 7 |] |])) [| [| 5; 37 |]; [| 16; 128 |] |] "[| 5; 37 |]; [| 16; 128 |] was waited"
 
-        testCase "Pow matrix test. Empty matrix given" <| fun _ ->
-            Expect.throws (fun _ -> (powMat ([|  |]) 2) |> ignore) "Exception should be raised"
         testCase "Pow matrix test. Not squared matrix given" <| fun _ ->
             Expect.throws (fun _ -> (powMat ([| [| 1; 1; 1 |]; [| 1; 1; 1 |] |]) 2) |> ignore) "Exception should be raised"
         testCase "Pow matrix test. Negative power given" <| fun _ ->
             Expect.throws (fun _ -> (powMat ([| [| 1; 1 |]; [| 1; 1 |] |]) -1) |> ignore) "Exception should be raised"
+        testCase "Pow matrix test. Empty matrix given" <| fun _ ->
+            Expect.sequenceEqual (powMat ([|  |]) 2) [| |] "Empty matrix was waited"
         testCase "Pow matrix test. Power = zero" <| fun _ ->
             Expect.sequenceEqual (powMat ([| [| 0; 1 |]; [| 1; 1 |] |]) 0) [| [| 1; 0 |]; [| 0; 1 |] |] "[| 1; 0 |]; [| 0; 1 |] was waited"
         testCase "Pow matrix test. Common case" <| fun _ ->

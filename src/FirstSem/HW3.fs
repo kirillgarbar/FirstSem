@@ -37,7 +37,10 @@ let mulMat (a:int [] []) (b:int [] []) =
             m
 
 let powMat (a:int [] []) p =
-    if a.Length <> a.[0].Length
+    if a.Length = 0
+        then
+            a
+    elif a.Length <> a.[0].Length
     then
         failwith "The number of rows is not equal to the number of columns"
     elif p < 0
