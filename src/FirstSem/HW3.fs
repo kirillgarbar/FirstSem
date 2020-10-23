@@ -28,14 +28,14 @@ let mulMat (a:int [] []) (b:int [] []) =
         if a.[0].Length = 0 || b.[0].Length = 0       // if a or b consists of [| |], a(or b).[0] will throw the out of range exception, so we check a(or b).Length before we check a(or b).[0].Length
         then
             failwith "Matrices should not be empty"
-        elif a.[0].Length <> b.Length
+        elif a.Length <> b.[0].Length
         then
-            failwith "The number of columns in a is not equal to the number of rows in b"       
+            failwith "The number of rows in a is not equal to the number of columns in b"       
         else
             let m = mat (a.Length) (b.[0].Length)
             for i = 0 to a.Length - 1 do
                 for j = 0 to b.[0].Length - 1 do
-                    for k = 0 to a.[0].Length - 1 do
+                    for k = 0 to a.Length - 1 do
                         m.[i].[j] <- m.[i].[j] + a.[i].[k] * b.[k].[j]
             m
 
