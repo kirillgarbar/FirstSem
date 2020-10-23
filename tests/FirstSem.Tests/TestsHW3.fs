@@ -21,21 +21,24 @@ let tests =
 
         testCase "Multiplying matrices test. Empty matrix given" <| fun _ ->
             Expect.throws (fun _ -> (mulMat ([|  |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
+        testCase "Multiplying matrices test. Empty matrix given 2" <| fun _ ->
+            Expect.throws (fun _ -> (mulMat ([| [| |]; [| |] |]) ([| [| 0; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
         testCase "Multiplying matrices test. Wrong size of matrices" <| fun _ ->
-            Expect.throws (fun _ -> (mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) ([| [| 0; 1 |]; [| 1; 1 |]; [| 1; 1 |] |])) |> ignore) "Exception should be raised"
+            Expect.throws (fun _ -> (mulMat ([| [| 0; 1 |]; [| 1; 1 |] |]) ([| [| 0; 1; 3 |]; [| 1; 1; 2 |]; [| 1; 1; 7 |] |])) |> ignore) "Exception should be raised"
         testCase "Multiplying matrices test. Common case" <| fun _ ->
-            Expect.sequenceEqual (mulMat ([| [| 1; 4 |]; [| 8; 8 |] |]) ([| [| 1; 9 |]; [| 1; 7 |] |])) [| [| 5; 37 |]; [| 16; 128 |] |] "[| 5; 37 |]; [| 16; 128 |] was waited"
+            Expect.sequenceEqual (mulMat ([| [| 1; 4; 2 |]; [| 8; 8 ; 4 |] |]) ([| [| 1; 9 |]; [| 1; 7 |]; [| 2; 1 |] |])) [| [| 9; 39 |]; [| 24; 132 |] |] "[| [| 9; 39 |]; [| 24; 132 |] |] was waited"
 
+        testCase "Pow matrix test. Empty matrix given" <| fun _ ->
+            Expect.throws (fun _ -> (powMat ([| |]) 2) |> ignore) "Exception should be raised"
         testCase "Pow matrix test. Not squared matrix given" <| fun _ ->
             Expect.throws (fun _ -> (powMat ([| [| 1; 1; 1 |]; [| 1; 1; 1 |] |]) 2) |> ignore) "Exception should be raised"
         testCase "Pow matrix test. Negative power given" <| fun _ ->
             Expect.throws (fun _ -> (powMat ([| [| 1; 1 |]; [| 1; 1 |] |]) -1) |> ignore) "Exception should be raised"
-        testCase "Pow matrix test. Empty matrix given" <| fun _ ->
-            Expect.sequenceEqual (powMat ([|  |]) 2) [| |] "Empty matrix was waited"
+        
         testCase "Pow matrix test. Power = zero" <| fun _ ->
             Expect.sequenceEqual (powMat ([| [| 0; 1 |]; [| 1; 1 |] |]) 0) [| [| 1; 0 |]; [| 0; 1 |] |] "[| 1; 0 |]; [| 0; 1 |] was waited"
         testCase "Pow matrix test. Common case" <| fun _ ->
-            Expect.sequenceEqual (powMat ([| [| 1; 4 |]; [| 8; 8 |] |]) 3) [| [| 321; 420 |]; [| 840; 1056 |] |] "[| 321; 420 |]; [| 840; 1056 |] was waited"
+            Expect.sequenceEqual (powMat ([| [| 1; 4; 2 |]; [| 8; 8; 1 |]; [| 3; 1; 2 |] |]) 3) [| [| 373; 470; 136 |]; [| 929; 1102; 299 |]; [| 226; 255; 78 |] |] "[| [| 373; 470; 136 |]; [| 929; 1102; 299 |]; [| 226; 255; 78 |] |] was waited"
 
         testCase "Task 1.1 Negative number given" <| fun _ ->
             Expect.throws (fun _ -> fibRec -1 |> ignore) "Exception should be raised"

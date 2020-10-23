@@ -22,10 +22,13 @@ let identMat n =
     m
 
 let mulMat (a:int [] []) (b:int [] []) =
-        if a.Length = 0 || b.Length = 0 || a.[0].Length = 0 || b.[0].Length = 0
+        if a.Length = 0 || b.Length = 0 
         then
             failwith "Matrices should not be empty"
-        elif a.[0].Length <> b.Length
+        if a.[0].Length = 0 || b.[0].Length = 0       // if a or b consists of [| |], a(or b).[0] will throw the out of range exception, so we check a(or b).Length before we check a(or b).[0].Length
+        then
+            failwith "Matrices should not be empty"
+        elif a.Length <> b.[0].Length
         then
             failwith "The number of rows in a is not equal to the number of columns in b"       
         else
@@ -38,8 +41,8 @@ let mulMat (a:int [] []) (b:int [] []) =
 
 let powMat (a:int [] []) p =
     if a.Length = 0
-        then
-            a
+    then
+        failwith "Matrix should not be empty"
     elif a.Length <> a.[0].Length
     then
         failwith "The number of rows is not equal to the number of columns"
