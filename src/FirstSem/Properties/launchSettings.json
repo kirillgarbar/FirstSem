@@ -1,8 +1,7 @@
 {
   "profiles": {
     "FirstSem": {
-      "commandName": "Project",
-      "commandLineArgs": "--swaptwobyindex 10"
+      "commandName": "Project"
     }
   }
 }
