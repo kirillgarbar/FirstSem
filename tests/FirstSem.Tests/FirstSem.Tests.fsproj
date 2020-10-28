@@ -5,6 +5,7 @@
         <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
+    	<Compile Include="TestsHW4.fs" />
     	<Compile Include="TestsHW3.fs" />
         <Compile Include="TestsHW2.fs" />
         <Compile Include="AssemblyInfo.fs" />
@@ -12,6 +13,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/FirstSem/FirstSem.fsproj" />
+        <ProjectReference Include="..\..\src\HW4\HW4.fsproj" />
     </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
