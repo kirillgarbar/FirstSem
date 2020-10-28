@@ -45,7 +45,7 @@ module Main =
                 printfn "%A" a
                 printfn "Enter X: "
                 let x = Console.ReadLine() |> int
-                printfn "%A" (HW2.indicesLesserX(x, a))
+                printfn "%A" (HW2.indicesLesserX x a)
             | p when p.Contains(IndicesNotFromRangeXY) ->
                 let a = HW2.genRandomArray(p.GetResult(IndicesNotFromRangeXY))
                 printfn "%A" a
@@ -53,7 +53,7 @@ module Main =
                 let x = Console.ReadLine() |> int
                 printfn "Enter Y: "
                 let y = Console.ReadLine() |> int
-                printfn "%A" (HW2.indicesNotFromRangeXY(x, y, a))
+                printfn "%A" (HW2.indicesNotFromRangeXY x y a)
             | p when p.Contains(SwapFS) ->
                 let a = HW2.genRandomArray(2)
                 printfn "%A" a
@@ -65,7 +65,7 @@ module Main =
                 let i = Console.ReadLine() |> int
                 printfn "Enter j: "
                 let j = Console.ReadLine() |> int
-                printfn "%A" (HW2.swapTwoByIndex(i, j, a))
+                printfn "%A" (HW2.swapTwoByIndex i j a)
             | p when p.Contains(FibRec) ->
                 printfn "%A" (HW3.fibRec(p.GetResult(FibRec)))
             | p when p.Contains(FibIt) ->

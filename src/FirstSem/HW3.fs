@@ -35,7 +35,7 @@ let mulMat (a:int [] []) (b:int [] []) =
             let m = mat (a.Length) (b.[0].Length)
             for i = 0 to a.Length - 1 do
                 for j = 0 to b.[0].Length - 1 do
-                    for k = 0 to a.Length - 1 do
+                    for k = 0 to a.[0].Length - 1 do
                         m.[i].[j] <- m.[i].[j] + a.[i].[k] * b.[k].[j]
             m
 

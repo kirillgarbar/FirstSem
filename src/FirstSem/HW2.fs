@@ -14,7 +14,7 @@ let calculateShortly x =
     let t = r + x
     r*t + t + 1
 
-let indicesLesserX (x, a:array<int>) =
+let indicesLesserX x (a:array<int>) =
     let mutable c = 0
     for i = 0 to a.Length - 1 do
         if a.[i] < x then c <- c + 1
@@ -26,7 +26,7 @@ let indicesLesserX (x, a:array<int>) =
             c <- c + 1
     r
 
-let indicesNotFromRangeXY (x, y, a:array<int>) =
+let indicesNotFromRangeXY x y (a:array<int>) =
     let mutable c = 0
     for i = 0 to a.Length - 1 do
         if a.[i] < x || a.[i] > y then c <- c + 1
@@ -44,7 +44,7 @@ let swapFS (a:array<int>) =
     a.[0] <- a.[0] - a.[1]
     a
   
-let swapTwoByIndex (i, j, a:array<int>) =
+let swapTwoByIndex i j (a:array<int>) =
     try
         a.[i] <- a.[i] + a.[j]
         a.[j] <- a.[i] - a.[j]

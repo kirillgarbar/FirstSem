@@ -22,14 +22,14 @@ let tests =
             Expect.equal 31 (HW2.calculateNaively(2)) "Value should be 31"
 
         testCase "Taks 3.1 Common case" <| fun _ ->
-            Expect.equal [| 0; 3; 4 |] (HW2.indicesLesserX(10, [| 1; 11; 15; 9; 8 |])) "Resulting array should be [| 0; 3; 4 |]"
+            Expect.equal [| 0; 3; 4 |] (HW2.indicesLesserX 10 [| 1; 11; 15; 9; 8 |]) "Resulting array should be [| 0; 3; 4 |]"
         testCase "Taks 3.2 Empty array given" <| fun _ ->
-            Expect.equal [||] (HW2.indicesLesserX(10, [||])) "Result should be an empty string"
+            Expect.equal [||] (HW2.indicesLesserX 10 [| |]) "Result should be an empty string"
 
         testCase "Taks 4.1 Common case" <| fun _ ->
-            Expect.equal [| 0; 2; 4 |] (HW2.indicesNotFromRangeXY(10, 12, [| 1; 11; 15; 10; 8 |])) "Resulting array should be [| 0; 2; 4 |]"
+            Expect.equal [| 0; 2; 4 |] (HW2.indicesNotFromRangeXY 10 12 [| 1; 11; 15; 10; 8 |]) "Resulting array should be [| 0; 2; 4 |]"
         testCase "Taks 4.2 Empty array given" <| fun _ ->
-            Expect.equal [||] (HW2.indicesLesserX(10, [||])) "Result should be an empty string"
+            Expect.equal [||] (HW2.indicesLesserX 10 [| |]) "Result should be an empty string"
 
         testCase "Taks 5.1 Both elements are positive but first is lesser" <| fun _ ->
             Expect.equal [| 2; 1 |] (HW2.swapFS([| 1; 2 |])) "Resulting array should be [| 2; 1 |]"
@@ -51,9 +51,9 @@ let tests =
         // swap alrgorithm has already been tested, so it won't be tested for task 6
 
         testCase "Taks 6.1 i is lesser then j" <| fun _ ->
-            Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex(1, 3, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
+            Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex 1 3 [| 1; 2; 3; 4; 5 |]) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
         testCase "Taks 6.2 i is greater then j" <| fun _ ->
-            Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex(3, 1, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
+            Expect.equal [| 1; 4; 3; 2; 5 |] (HW2.swapTwoByIndex 3 1 [| 1; 2; 3; 4; 5 |]) "Resulting array should be [| 1; 4; 3; 2; 5 |]"
         testCase "Taks 6.3 index out of bounds check" <| fun _ ->
-            Expect.equal [| 1; 2; 3; 4; 5 |] (HW2.swapTwoByIndex(10, 1, [| 1; 2; 3; 4; 5 |])) "Resulting array should be [| 1; 2; 3; 4; 5 |] if exception is throrwn"
+            Expect.equal [| 1; 2; 3; 4; 5 |] (HW2.swapTwoByIndex 10 1 [| 1; 2; 3; 4; 5 |]) "Resulting array should be [| 1; 2; 3; 4; 5 |] if exception is throrwn"
         ]
