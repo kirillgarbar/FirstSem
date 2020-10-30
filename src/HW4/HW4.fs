@@ -12,6 +12,8 @@ let readArray file =
             failwith "Given file has not been found"
         | :? System.IO.IOException ->
             failwith "Invalid file name"
+        | :? System.ArgumentException ->
+            failwith "Empty file path given"
 
 let readList file =
     try
@@ -25,22 +27,37 @@ let readList file =
         failwith "Given file has not been found"
     | :? System.IO.IOException ->
         failwith "Invalid file name"
+    | :? System.ArgumentException ->
+        failwith "Empty file path given"
 
 let write file content =
-    let a = System.IO.File.WriteAllText (file, content)
-    a
+    try
+        let a = System.IO.File.WriteAllText (file, content)
+        a
+    with
+    | :? System.ArgumentException ->
+        failwith "Empty file path given"
 
 let writeArray file (content:array<int>) =
-    let mutable s = ""
-    for i = 0 to content.Length - 1 do
-        s <- s + string content.[i] + "\n"
-    write file s
+    try
+        let mutable s = ""
+        for i = 0 to content.Length - 1 do
+            s <- s + string content.[i] + "\n"
+        write file s
+    with
+    | :? System.ArgumentException ->
+        failwith "Empty file path given"
 
 let writeList file (content:list<int>) =
-    let mutable s = ""
-    for i = 0 to content.Length - 1 do
-        s <- s + string content.[i] + "\n"
-    write file s
+    try
+        let rec go (l:list<int>) s =
+            match l with
+            | [] -> s
+            | head::tail -> go tail (s + string head + "\n")
+        write file (go content "")
+    with
+    | :? System.ArgumentException ->
+        failwith "Empty file path given"
 
 let arrayBubbleSort (a:array<int>) =
     for i = 0 to a.Length - 2 do
@@ -54,7 +71,8 @@ let arrayBubbleSort (a:array<int>) =
 
 let listBubbleSort (l:list<int>) =
     let mutable r = l
-    let rec go = function
+    let rec go (l:list<int>) =
+        match l with
         | [] -> []
         | x :: y :: tail ->
             if x > y
@@ -112,44 +130,33 @@ let rec listQuickSort (l:list<int>) =
                     l2 <- l2 @ [l.[i]]
         (listQuickSort l1) @ [l.[p]] @ (listQuickSort l2)
 
-let pack32To64 (a:int) (b:int) =
+let pack32To64 (a, b) =
     if b >= 0
     then
         (a |> int64 <<< 32) + (b |> int64)
     else
         (a |> int64 <<< 32) + 4294967296L + (b |> int64)
 
-let pack16To32 (a:int16) (b:int16) =
+let pack16To32 (a:int16,b:int16) =
     if b >= 0s
     then
         (a |> int32 <<< 16) + (b |> int32)
     else
         (a |> int32 <<< 16) + 65536 + (b |> int32)
 
-let pack16To64 (a:int16) (b:int16) (c:int16) (d:int16) =
-    pack32To64 (pack16To32 a b) (pack16To32 c d)
+let pack16To64 (a:int16, b:int16, c:int16, d:int16) =
+    pack32To64 (pack16To32 (a, b), pack16To32 (c, d))
 
 let unpack64To32 (a:int64) =
-    let r = [| 0; 0 |]
-    r.[0] <- a >>> 32 |> int
-    r.[1] <- (a <<< 32) >>> 32 |> int
-    r
+    (a >>> 32 |> int, (a <<< 32) >>> 32 |> int)
 
 let unpack32To16 (a:int) =
-    let r = [| 0s; 0s |]
-    r.[0] <- a >>> 16 |> int16
-    r.[1] <- (a <<< 16) >>> 16 |> int16
-    r
+    (a >>> 16 |> int16, (a <<< 16) >>> 16 |> int16)
 
 let unpack64To16 (a:int64) =
-    let r = [| 0s; 0s; 0s; 0s |]
-    let abcd = unpack64To32 (a)
-    let ab = unpack32To16 abcd.[0]
-    let cd = unpack32To16 abcd.[1]
-    r.[0] <- ab.[0]
-    r.[1] <- ab.[1]
-    r.[2] <- cd.[0]
-    r.[3] <- cd.[1]
-    r
+    let abcd = unpack64To32 a
+    let ab = unpack32To16 (fst abcd)
+    let cd = unpack32To16 (snd abcd)
+    (fst ab, snd ab, fst cd, snd cd)
 
 

@@ -26,41 +26,29 @@ module Main =
                 | Unpack64to16 _ -> "Calculates fib number with index N by iterations"
     [<EntryPoint>]
     let main (argv: string array) =
+        let sort sortFun readFun writeFun ioFiles =
+            let i, o = fst ioFiles, snd ioFiles
+            writeFun o (sortFun (readFun i))
         try
             let parser = ArgumentParser.Create<CLIArguments>(programName = "FirstSem")
             let results = parser.Parse(argv)
             match parser.ParseCommandLine argv with
             | p when p.Contains(ArrayBubbleSort) ->
-                let io = p.GetResult ArrayBubbleSort
-                let input, output = fst io, snd io
-                writeArray output (arrayBubbleSort (readArray input))
+                sort arrayBubbleSort readArray writeArray (p.GetResult ArrayBubbleSort)
             | p when p.Contains(ListBubbleSort) ->
-                let io = p.GetResult ListBubbleSort
-                let input, output = fst io, snd io
-                writeList output (listBubbleSort (readList input))
+                sort listBubbleSort readList writeList (p.GetResult ListBubbleSort)
             | p when p.Contains(ArrayQuickSort) ->
-                let io = p.GetResult ArrayQuickSort
-                let input, output = fst io, snd io
-                writeArray output (arrayQuickSort (readArray input))
+                sort arrayQuickSort readArray writeArray (p.GetResult ArrayQuickSort)
             | p when p.Contains(ListQuickSort) ->
-                let io = p.GetResult ListQuickSort
-                let input, output = fst io, snd io
-                writeList output (listQuickSort (readList input))
+                sort listBubbleSort readList writeList (p.GetResult ListQuickSort)
             | p when p.Contains(Pack32to64) ->
-                let fs = p.GetResult Pack32to64
-                let f, s = fst fs, snd fs
-                printfn "%i" (pack32To64 f s)
+                printfn "%A" (pack32To64 (p.GetResult Pack32to64))
             | p when p.Contains(Unpack64to32) ->
-                let i = p.GetResult Unpack64to32
-                printfn "%A" (unpack64To32 i)
+                printfn "%A" (unpack64To32 (p.GetResult Unpack64to32))
             | p when p.Contains(Pack16to64) ->
-                let i = p.GetResult Pack16to64
-                match i with
-                | (a, b, c, d) ->
-                    printfn "%A" (pack16To64 a b c d)
+                printfn "%A" (pack16To64 (p.GetResult Pack16to64))
             | p when p.Contains(Unpack64to16) ->
-                let i = p.GetResult Unpack64to16
-                printfn "%A" (unpack64To16 i)
+                printfn "%A" (unpack64To16 (p.GetResult Unpack64to16))
             | _ ->
                 printfn "%s" (parser.PrintUsage())
             0
