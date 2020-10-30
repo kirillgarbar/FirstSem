@@ -37,6 +37,8 @@ let write file content =
     with
     | :? System.ArgumentException ->
         failwith "Empty file path given"
+    | :? System.IO.IOException ->
+        failwith "Invalid file name"
 
 let writeArray file (content:array<int>) =
     try
@@ -47,6 +49,8 @@ let writeArray file (content:array<int>) =
     with
     | :? System.ArgumentException ->
         failwith "Empty file path given"
+    | :? System.IO.IOException ->
+        failwith "Invalid file name"
 
 let writeList file (content:list<int>) =
     try
@@ -58,6 +62,8 @@ let writeList file (content:list<int>) =
     with
     | :? System.ArgumentException ->
         failwith "Empty file path given"
+    | :? System.IO.IOException ->
+        failwith "Invalid file name"
 
 let arrayBubbleSort (a:array<int>) =
     for i = 0 to a.Length - 2 do
