@@ -57,19 +57,6 @@ let tests =
         testReadEx readArray "readArray"
         testReadEx readList "readList"
 
-        testCase "write invalid file name given" <| fun _ ->
-            Expect.throws (fun _ -> write "???" "" |> ignore) "Exception should be raised"
-        testCase "write empty file path given" <| fun _ ->
-            Expect.throws (fun _ -> write "" "" |> ignore) "Exception should be raised"
-        testCase "writeArray invalid file name given" <| fun _ ->
-            Expect.throws (fun _ -> writeArray "???" [| |] |> ignore) "Exception should be raised"
-        testCase "writeArray empty file path given" <| fun _ ->
-            Expect.throws (fun _ -> writeArray "" [| |] |> ignore) "Exception should be raised"
-        testCase "writeList invalid file name given" <| fun _ ->
-            Expect.throws (fun _ -> writeList "???" [ ] |> ignore) "Exception should be raised"
-        testCase "writeList empty file path given" <| fun _ ->
-            Expect.throws (fun _ -> writeList "" [ ] |> ignore) "Exception should be raised"
-
         testCase "arrayBubblle sort test. Empty array given" <| fun _ ->
             Expect.equal (arrayBubbleSort [| |]) [| |] "Empty array should be returned"
         testSort arrayBubbleSort "arrayBubbleSort" Array.sort "Array.sort"
