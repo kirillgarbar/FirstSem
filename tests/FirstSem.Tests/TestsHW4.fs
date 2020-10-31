@@ -36,8 +36,7 @@ let testPackUnpack (packFun) packFunName (unpackFun) unpackFunName =
     let msg = sprintf "%s is not inverse to %s" packFunName unpackFunName
     let name = sprintf "%s and %s test" packFunName unpackFunName
     testProperty name <| fun (a, b) ->
-        let s = (a, b)
-        Expect.equal s (unpackFun (packFun ((fst s), (snd s)))) msg
+        Expect.equal (a, b) (unpackFun (packFun (a, b))) msg
     
 [<Tests>]
 let tests =
