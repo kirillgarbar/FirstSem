@@ -96,18 +96,11 @@ let rec arrayQuickSort (a:array<int>) =
     then
         a
     else
-        let pi = a.Length / 2
-        let pivot = a.[pi]
-        let newa = Array.zeroCreate (a.Length - 1)
-        let mutable j = 0
-        for i = 0 to a.Length - 1 do
-            if i <> pi
-            then
-                newa.[j] <- a.[i]
-                j <- j + 1
-        let left, right = Array.partition(fun i -> i < pivot) newa
-        Array.append(Array.append (arrayQuickSort left) [| pivot |]) (arrayQuickSort right)
-
+        let pivot = a.[a.Length / 2]
+        let pivots, lr = Array.partition(fun i -> i = pivot) a
+        let left, right = Array.partition(fun i -> i < pivot) lr
+        Array.append(Array.append (arrayQuickSort left) pivots) (arrayQuickSort right)
+   
 let rec listQuickSort(l:list<int>) =
     match l with
     | [] ->  []
