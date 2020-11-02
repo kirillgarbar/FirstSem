@@ -96,45 +96,24 @@ let rec arrayQuickSort (a:array<int>) =
     then
         a
     else
-        let mutable c = 0
+        let pi = a.Length / 2
+        let pivot = a.[pi]
+        let newa = Array.zeroCreate (a.Length - 1)
         let mutable j = 0
-        let p = a.Length / 2
         for i = 0 to a.Length - 1 do
-            if a.[i] < a.[p]
+            if i <> pi
             then
-                c <- c + 1
-        let m1 = Array.zeroCreate (c)
-        let m2 = Array.zeroCreate (a.Length - c - 1)
-        c <- 0
-        for i = 0 to a.Length - 1 do
-            if i <> p
-            then
-                if a.[i] < a.[p]
-                then
-                    m1.[c] <- a.[i]
-                    c <- c + 1
-                else
-                    m2.[j] <- a.[i]
-                    j <- j + 1
-        Array.append(Array.append (arrayQuickSort m1) [| a.[p] |]) (arrayQuickSort m2)
+                newa.[j] <- a.[i]
+                j <- j + 1
+        let left, right = Array.partition(fun i -> i < pivot) newa
+        Array.append(Array.append (arrayQuickSort left) [| pivot |]) (arrayQuickSort right)
 
-let rec listQuickSort (l:list<int>) =
-    if l.Length <= 1
-    then
-        l
-    else
-        let mutable l1 = []
-        let mutable l2 = []
-        let p = l.Length / 2
-        for i = 0 to l.Length - 1 do
-            if i <> p
-            then
-                if l.[i] < l.[p]
-                then
-                    l1 <- l1 @ [l.[i]]
-                else
-                    l2 <- l2 @ [l.[i]]
-        (listQuickSort l1) @ [l.[p]] @ (listQuickSort l2)
+let rec listQuickSort(l:list<int>) =
+    match l with
+    | [] ->  []
+    | pivot::tail ->
+        let left, right = List.partition(fun i -> i < pivot) tail
+        (listQuickSort left) @ [pivot] @ (listQuickSort right)
 
 let pack32To64 (a, b) =
     if b >= 0
@@ -164,5 +143,4 @@ let unpack64To16 (a:int64) =
     let ab = unpack32To16 (fst abcd)
     let cd = unpack32To16 (snd abcd)
     (fst ab, snd ab, fst cd, snd cd)
-
 
