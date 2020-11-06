@@ -20,10 +20,10 @@ module Main =
                 | ListBubbleSort _ -> "Sorts the list in file with given path by bubble sorting and writes result in another given file"
                 | ArrayQuickSort _ -> "Sorts the array in file with given path by quick sorting and writes result in another given file"
                 | ListQuickSort _ -> "Sorts the list in file with given path by bubble sorting and writes result in another given file"
-                | Pack32to64 _ -> "Generates random array of two elements and swaps their positions"
-                | Unpack64to32 _ -> "Generates random array of given length (<len>) and swaps two elements with indices i and j"
-                | Pack16to64 _ -> "Calculates fib number with index N by recursion"
-                | Unpack64to16 _ -> "Calculates fib number with index N by iterations"
+                | Pack32to64 _ -> "Packs two int32 numbers into one int64"
+                | Unpack64to32 _ -> "Unpacks int64 to two int32 numbers"
+                | Pack16to64 _ -> "Packs four int16 numbers into one int64"
+                | Unpack64to16 _ -> "Unpacks int64 number to 4 int16"
     [<EntryPoint>]
     let main (argv: string array) =
         let sort sortFun readFun writeFun ioFiles =
@@ -31,7 +31,6 @@ module Main =
             writeFun o (sortFun (readFun i))
         try
             let parser = ArgumentParser.Create<CLIArguments>(programName = "FirstSem")
-            let results = parser.Parse(argv)
             match parser.ParseCommandLine argv with
             | p when p.Contains(ArrayBubbleSort) ->
                 sort arrayBubbleSort readArray writeArray (p.GetResult ArrayBubbleSort)

@@ -14,56 +14,28 @@ let readArray file =
             failwith "Invalid file name"
         | :? System.ArgumentException ->
             failwith "Empty file path given"
-
+                
 let readList file =
-    try
-        let f = System.IO.File.ReadAllLines file
-        let mutable l = []
-        for i = 0 to f.Length - 1 do
-            l <- l @ [int (f.[i].Trim())]
-        l
-    with
-    | :? System.IO.FileNotFoundException ->
-        failwith "Given file has not been found"
-    | :? System.IO.IOException ->
-        failwith "Invalid file name"
-    | :? System.ArgumentException ->
-        failwith "Empty file path given"
+    readArray file |> Array.toList
 
 let write file content =
     try
-        let a = System.IO.File.WriteAllText (file, content)
-        a
+        System.IO.File.WriteAllText (file, content)
     with
     | :? System.ArgumentException ->
         failwith "Empty file path given"
     | :? System.IO.IOException ->
         failwith "Invalid file name"
 
-let writeArray file (content:array<int>) =
-    try
-        let mutable s = ""
-        for i = 0 to content.Length - 1 do
-            s <- s + string content.[i] + "\n"
-        write file s
-    with
-    | :? System.ArgumentException ->
-        failwith "Empty file path given"
-    | :? System.IO.IOException ->
-        failwith "Invalid file name"
+let writeArray file (content: array<int>) =
+    let mutable s = ""
+    for i = 0 to content.Length - 1 do
+        s <- s + string content.[i] + "\n"
+    write file s
 
-let writeList file (content:list<int>) =
-    try
-        let rec go (l:list<int>) s =
-            match l with
-            | [] -> s
-            | head::tail -> go tail (s + string head + "\n")
-        write file (go content "")
-    with
-    | :? System.ArgumentException ->
-        failwith "Empty file path given"
-    | :? System.IO.IOException ->
-        failwith "Invalid file name"
+let writeList file (content: list<int>) =
+    writeArray file (List.toArray content)
+
 
 let arrayBubbleSort (a:array<int>) =
     for i = 0 to a.Length - 2 do
@@ -76,7 +48,6 @@ let arrayBubbleSort (a:array<int>) =
     a
 
 let listBubbleSort (l:list<int>) =
-    let mutable r = l
     let rec go (l:list<int>) =
         match l with
         | [] -> []
@@ -87,9 +58,15 @@ let listBubbleSort (l:list<int>) =
             else
                 x :: (go(y :: tail))
         | x :: tail -> [x]
-    for i = 0 to l.Length - 1 do
-        r <- go r
-    r
+
+    let rec go2 (l:list<int>) c =
+        if c = l.Length
+        then
+            l
+        else
+            go2 (go l) (c + 1)
+
+    go2 l 0
 
 let rec arrayQuickSort (a:array<int>) =
     if a.Length <= 1
@@ -100,7 +77,7 @@ let rec arrayQuickSort (a:array<int>) =
         let pivots, lr = Array.partition(fun i -> i = pivot) a
         let left, right = Array.partition(fun i -> i < pivot) lr
         Array.append(Array.append (arrayQuickSort left) pivots) (arrayQuickSort right)
-   
+    
 let rec listQuickSort(l:list<int>) =
     match l with
     | [] ->  []
