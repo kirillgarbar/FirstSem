@@ -120,12 +120,12 @@ let pack32To64 (a, b) =
     else
         (a |> int64 <<< 32) + 4294967296L + (b |> int64)
 
-let pack16To32 (a:int16,b:int16) =
+let pack16To32 (a:int16, b:int16) =
     if b >= 0s
     then
-        (a |> int32 <<< 16) + (b |> int32)
+        (int32 a <<< 16) + (int32 b)
     else
-        (a |> int32 <<< 16) + 65536 + (b |> int32)
+        (int32 a <<< 16) + 65536 + (int32 b)
 
 let pack16To64 (a:int16, b:int16, c:int16, d:int16) =
     pack32To64 (pack16To32 (a, b), pack16To32 (c, d))
