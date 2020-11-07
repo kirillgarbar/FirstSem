@@ -12,7 +12,7 @@ let testSort sortFun1 sortFun1Name sortFun2 sortFun2Name emptyColl =
         testCase name2 <| fun _ ->
             Expect.equal (sortFun1 emptyColl) emptyColl "Empty collection should be returned"
         testProperty name1 <| fun (a) ->
-            Expect.equal (sortFun1 a) (sortFun2 a) msg
+            Expect.sequenceEqual (sortFun1 a) (sortFun2 a) msg
     ]
 
 let testWriteRead writeFun writeFunName readFun readFunName =
@@ -74,8 +74,9 @@ let tests =
 
         testSort arrayBubbleSort "arrayBubbleSort" Array.sort "Array.sort" [| |]
         testSort listBubbleSort "listBubbleSort" List.sort "List.sort" [ ]
-        testSort arrayQuickSort "arrayQuicksort" Array.sort "Array.sort" [| |]
-        testSort listQuickSort "listQuicksort" List.sort "List.sort" [ ]
+        testSort arrayQSort "arrayQSort" Array.sort "Array.sort" [| |]
+        testSort arrayQuickSort "arrayQuickSort" Array.sort "Array.sort" [| |]
+        testSort listQuickSort "listQuickSort" List.sort "List.sort" [ ]
 
         testPackUnpack pack16To32 "pack16To32" unpack32To16 "unpack32To16"
         testPackUnpack pack32To64 "pack32To64" unpack64To32 "unpack64To32"

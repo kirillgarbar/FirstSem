@@ -27,7 +27,7 @@ let write file content =
     | :? System.IO.IOException ->
         failwith "Invalid file name"
 
-let writeArray file (content: array<int>) =
+let writeArray file (content:array<int>) =
     let mutable s = ""
     for i = 0 to content.Length - 1 do
         s <- s + string content.[i] + "\n"
@@ -36,16 +36,16 @@ let writeArray file (content: array<int>) =
 let writeList file (content: list<int>) =
     writeArray file (List.toArray content)
 
-
 let arrayBubbleSort (a:array<int>) =
-    for i = 0 to a.Length - 2 do
-        for j = 0 to a.Length - 2 do
-            if a.[j] > a.[j + 1]
+    let m = Array.copy a
+    for i = 0 to m.Length - 2 do
+        for j = 0 to m.Length - 2 do
+            if m.[j] > m.[j + 1]
             then
-                let c = a.[j]
-                a.[j] <- a.[j + 1]
-                a.[j + 1] <- c
-    a
+                let c = m.[j]
+                m.[j] <- m.[j + 1]
+                m.[j + 1] <- c
+    m
 
 let listBubbleSort (l:list<int>) =
     let rec go (l:list<int>) =
@@ -68,7 +68,7 @@ let listBubbleSort (l:list<int>) =
 
     go2 l 0
 
-let rec arrayQuickSort (a:array<int>) =
+let rec arrayQSort (a:array<int>) =
     if a.Length <= 1
     then
         a
@@ -76,14 +76,42 @@ let rec arrayQuickSort (a:array<int>) =
         let pivot = a.[a.Length / 2]
         let pivots, lr = Array.partition(fun i -> i = pivot) a
         let left, right = Array.partition(fun i -> i < pivot) lr
-        Array.append(Array.append (arrayQuickSort left) pivots) (arrayQuickSort right)
+        Array.append (Array.append (arrayQSort left) pivots) (arrayQSort right)
+
+let arrayQuickSort (a:array<int>) =
+    let swap (a:array<int>) i j =
+        let c = a.[i]
+        a.[i] <- a.[j]
+        a.[j] <- c
+
+    let partition (a:array<int>) l r =
+        let pivot = a.[r]
+        let mutable i = l - 1
+        for j = l to r - 1 do
+            if a.[j] <= pivot
+            then
+                i <- i + 1
+                swap a i j
+        swap a (i + 1) r
+        i + 1
+
+    let rec go (a:array<int>) l r =
+        if l < r
+        then
+            let pi = partition a l r
+            go a l (pi - 1)
+            go a (pi + 1) r
+
+    let m = Array.copy a
+    go m 0 (a.Length - 1)
+    m
     
 let rec listQuickSort(l:list<int>) =
     match l with
-    | [] ->  []
-    | pivot::tail ->
+    | [] -> []
+    | pivot :: tail ->
         let left, right = List.partition(fun i -> i < pivot) tail
-        (listQuickSort left) @ [pivot] @ (listQuickSort right)
+        (listQuickSort left) @ (pivot :: (listQuickSort right))
 
 let pack32To64 (a, b) =
     if b >= 0
@@ -109,8 +137,8 @@ let unpack32To16 (a:int) =
     (a >>> 16 |> int16, (a <<< 16) >>> 16 |> int16)
 
 let unpack64To16 (a:int64) =
-    let abcd = unpack64To32 a
-    let ab = unpack32To16 (fst abcd)
-    let cd = unpack32To16 (snd abcd)
-    (fst ab, snd ab, fst cd, snd cd)
+    let ab, cd = unpack64To32 a
+    let a, b = unpack32To16 ab
+    let c, d = unpack32To16 cd
+    (a, b, c, d)
 
