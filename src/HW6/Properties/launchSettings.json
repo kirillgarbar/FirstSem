@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FirstSem": {
+      "commandName": "Project",
+      "commandLineArgs": "--multiplyboolmatrices \"Input1.txt\" \"Input2.txt\" \"Output.txt\""
+    }
+  }
+}
