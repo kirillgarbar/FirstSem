@@ -19,51 +19,39 @@ type bMat =
     val L:list<rc>
     new (l, r, c) = {L = l; R = r; C = c}
  
-let readBoolMat file =
-    let r = System.IO.File.ReadAllLines file
-    let m = Array.zeroCreate r.Length
-    for i = 0 to r.Length - 1 do
-        m.[i] <- (r.[i].Trim ' ').Split ' '
+let readBMat file =
+    let m = Array.map (fun (i:string) -> (i.Trim ' ').Split ' ') (System.IO.File.ReadAllLines file)
 
-    for i in m do
-        for j in i do
-            if j <> "1" && j <> "0"
-            then
-                failwith "Matrix should contain only 0 or 1 values"
-
-    Array.map (fun i -> Array.map int i) m
-
-let writeMat file (mat: int [] []) =
-    let mutable s = ""
-    for r in mat do
-        for c in r do
-            s <- s + string c + " "
-        s <- (s.Trim ' ') + "\n"
-        
-    System.IO.File.WriteAllText (file, s)
-
-let boolMatToBMat (m:int [] []) =
-    for i in m do
-        for j in i do
-            if j <> 1 && j <> 0
-            then
-                failwith "Matrix should contain only 0 or 1 values"
     if Array.isEmpty m
     then
         bMat([], 0, 0)
     else
+        let len = m.[0].Length
+        for i = 0 to m.Length - 1 do
+            if m.[i].Length <> len
+            then
+                failwith "Matrix should me rectangular"
+            for j in m.[i] do
+                if j <> "1" && j <> "0"
+                then
+                    failwith "Matrix should contain only 0 or 1 values"
+
         let l = [
             for i = 0 to m.Length - 1 do
                 for j = 0 to m.[0].Length - 1 do
-                    if m.[i].[j] = 1 then rc(i * 1<row>, j * 1<col>)
+                    if m.[i].[j] = "1" then rc(i * 1<row>, j * 1<col>)
         ]
         bMat(l, m.Length, m.[0].Length)
-    
-let bMatToMat (bM:bMat) =
-    let m = mat bM.R bM.C
-    for rc in bM.L do
-        m.[int rc.R].[int rc.C] <- 1
-    m
+
+let writeBMat file (m: bMat) =
+    let bMatToMat (bM:bMat) =
+        let m = Array.init bM.R (fun _ -> Array.create bM.C "0")
+        for rc in bM.L do
+            m.[int rc.R].[int rc.C] <- "1"
+        m
+
+    let m = Array.fold (fun s i -> s + (Array.fold (fun s1 j -> s1 + string j + " ") "" i) + "\n") "" (bMatToMat m)
+    System.IO.File.WriteAllText (file, m)
 
 let mulBMat (a1:bMat) (b1:bMat) =
     if a1.C <> b1.R

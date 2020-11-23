@@ -18,9 +18,9 @@ module Main =
             match parser.ParseCommandLine argv with
             | p when p.Contains(MultiplyBoolMatrices) ->
                 let i1, i2, o = p.GetResult(MultiplyBoolMatrices)
-                let m1 = boolMatToBMat (readBoolMat i1)
-                let m2 = boolMatToBMat (readBoolMat i2)
-                writeMat o (bMatToMat (mulBMat m1 m2))
+                let m1 = readBMat i1
+                let m2 = readBMat i2
+                writeBMat o (mulBMat m1 m2)
             | _ ->
                 printfn "%s" (parser.PrintUsage())
             0
