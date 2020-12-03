@@ -1,30 +1,27 @@
 module HW6
 
-open System
-open HW3
-
 [<Measure>] type row
 [<Measure>] type col
 
 [<Struct>]
-type rc =
-    val R:int<row>
-    val C:int<col>
-    new(x, y) = {R = x; C = y}
+type row_col =
+    val Row:int<row>
+    val Col:int<col>
+    new(x, y) = {Row = x; Col = y}
 
 [<Struct>]
-type bMat =
-    val R:int
-    val C:int
-    val L:list<rc>
-    new (l, r, c) = {L = l; R = r; C = c}
+type boolMat =
+    val Rows:int
+    val Cols:int
+    val Coordinates:list<row_col>
+    new (l, r, c) = {Coordinates = l; Rows = r; Cols = c}
  
-let readBMat file =
+let readBoolMat file =
     let m = Array.map (fun (i:string) -> (i.Trim ' ').Split ' ') (System.IO.File.ReadAllLines file)
 
     if Array.isEmpty m
     then
-        bMat([], 0, 0)
+        boolMat([], 0, 0)
     else
         let len = m.[0].Length
         for i = 0 to m.Length - 1 do
@@ -39,31 +36,31 @@ let readBMat file =
         let l = [
             for i = 0 to m.Length - 1 do
                 for j = 0 to m.[0].Length - 1 do
-                    if m.[i].[j] = "1" then rc(i * 1<row>, j * 1<col>)
+                    if m.[i].[j] = "1" then row_col(i * 1<row>, j * 1<col>)
         ]
-        bMat(l, m.Length, m.[0].Length)
+        boolMat(l, m.Length, m.[0].Length)
 
-let writeBMat file (m: bMat) =
-    let bMatToMat (bM:bMat) =
-        let m = Array.init bM.R (fun _ -> Array.create bM.C "0")
-        for rc in bM.L do
-            m.[int rc.R].[int rc.C] <- "1"
+let writeBoolMat file (m: boolMat) =
+    let boolMatToMat (bM: boolMat) =
+        let m = Array.init bM.Rows (fun _ -> Array.create bM.Cols "0")
+        for rc in bM.Coordinates do
+            m.[int rc.Row].[int rc.Col] <- "1"
         m
 
-    let m = Array.fold (fun s i -> s + (Array.fold (fun s1 j -> s1 + string j + " ") "" i) + "\n") "" (bMatToMat m)
+    let m = Array.fold (fun s i -> s + (Array.fold (fun s1 j -> s1 + string j + " ") "" i) + "\n") "" (boolMatToMat m)
     System.IO.File.WriteAllText (file, m)
-
-let mulBMat (a1:bMat) (b1:bMat) =
-    if a1.C <> b1.R
+    
+let mulBoolMat (a1:boolMat) (b1:boolMat) =
+    if a1.Cols <> b1.Rows
     then
         failwith "Wrong sized matrices given"
     else
         let l = [
-            for f in a1.L do
-                for g in b1.L do
-                    if int g.R = int f.C then rc(f.R, g.C)
+            for f in a1.Coordinates do
+                for g in b1.Coordinates do
+                    if int g.Row = int f.Col then row_col(f.Row, g.Col)
         ]
-        bMat(List.distinct l, a1.R, b1.C)
+        boolMat(List.distinct l, a1.Rows, b1.Cols)
 
 
 
