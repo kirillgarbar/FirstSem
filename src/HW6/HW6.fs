@@ -15,30 +15,19 @@ type boolMat =
     val Cols:int
     val Coordinates:list<row_col>
     new (l, r, c) = {Coordinates = l; Rows = r; Cols = c}
- 
+
 let readBoolMat file =
-    let m = Array.map (fun (i:string) -> (i.Trim ' ').Split ' ') (System.IO.File.ReadAllLines file)
-
-    if Array.isEmpty m
-    then
-        boolMat([], 0, 0)
-    else
-        let len = m.[0].Length
-        for i = 0 to m.Length - 1 do
-            if m.[i].Length <> len
-            then
-                failwith "Matrix should me rectangular"
-            for j in m.[i] do
-                if j <> "1" && j <> "0"
-                then
-                    failwith "Matrix should contain only 0 or 1 values"
-
+    let m = Array.fold (fun (bm, row, len) (str:string) ->
+        let line = ((str.Trim ' ').Split ' ')
         let l = [
-            for i = 0 to m.Length - 1 do
-                for j = 0 to m.[0].Length - 1 do
-                    if m.[i].[j] = "1" then row_col(i * 1<row>, j * 1<col>)
+            for i = 0 to line.Length - 1 do
+                if line.Length <> len && row > 0 then failwith "Matrix should me rectangular"
+                elif line.[i] = "1" then row_col(row * 1<row>, i * 1<col>)
+                elif line.[i] <> "0" then failwith "Matrix should contain only 0 or 1 values"
         ]
-        boolMat(l, m.Length, m.[0].Length)
+        (bm @ l, row + 1, line.Length)) ([], 0, 0) (System.IO.File.ReadAllLines file)
+    match m with
+    | list, rows, cols -> boolMat(list, rows, cols)
 
 let writeBoolMat file (m: boolMat) =
     let boolMatToMat (bM: boolMat) =
