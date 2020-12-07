@@ -6,18 +6,13 @@ type MyList<'t> =
 
 type MyString = MyList<char>
 
-let len l =
-    let rec go l c =
-        match l with
-            | One _ -> c + 1
-            | Cons(_, tail) -> go tail (c + 1)
-
-    go l 0
-
 let rec fold folder acc l  =
     match l with
     | One x -> folder acc x
     | Cons(x, tail) -> fold folder (folder acc x) tail
+
+let len l =
+    fold (fun i _ -> i + 1) 0 l
 
 let rec concat l1 l2 =
     match l1 with
