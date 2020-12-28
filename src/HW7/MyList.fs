@@ -93,14 +93,14 @@ let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
     else
         failwith "Length of lists should be equal"
 
-let equalize x y =
+let equalize x y =  
     let rec go x y dif =
         if dif = 0 then (x, y) elif dif < 0 then go (Cons(0, x)) y (dif + 1) else go x (Cons(0, y)) (dif - 1)
 
     let dif = len x - len y
     go x y dif
     
-let rec delZeroHead l =
+let rec delZeroHead l = // удаляет все нули из префикса списка
     match l with
     | One i -> l
     | Cons(h, tail) -> if h = 0 then delZeroHead tail else l
@@ -113,5 +113,3 @@ let intToMyList i =
 
 let rec addZeroes c l =
     if c <= 0 then l else addZeroes (c - 1) (Cons(0, l))
-
-let append x y = reverse (Cons(y, reverse x))

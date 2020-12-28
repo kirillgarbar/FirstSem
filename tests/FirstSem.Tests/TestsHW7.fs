@@ -89,15 +89,6 @@ let tests =
         testCase "addZeroes test" <| fun _ ->
             let l = genRandomList 5 |> listToMyList |> addZeroes 3 |> myListToList
             Expect.sequenceEqual l.[0..2] [0;0;0] "addZeroes is wrong"
-
-        testProperty "append test" <| fun (a, b) ->
-            let l1 = genRandomList a
-            let l2 = genRandomList b
-            let ml1 = l1 |> listToMyList
-            let ml2 = l2 |> listToMyList
-            let r1 = l1 @ l2
-            let r2 = concat ml1 ml2 |> myListToList
-            Expect.sequenceEqual r1 r2 "@ =/= concat"
             
     ]
 

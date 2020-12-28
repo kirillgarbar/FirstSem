@@ -16,7 +16,7 @@ type BigInt =
                 failwith "Numbers should be in range 0..9"
         }
 
-let notLesser x y =
+let notLesser x y = // сравнивает списки в лексикографическом порядке
     let lx = len x
     let ly = len y
     if lx > ly
@@ -42,14 +42,14 @@ let reverseSign (x:BigInt) =
 
 let sign i = if i < 0 then -1 else 1
             
-let sumOrSub (x:BigInt) (y:BigInt) operator =
-    let xe, ye = equalize x.Bits y.Bits
-    let mapped = map2 (fun x1 y1 -> operator (x.Sign * x1) (y.Sign * y1)) xe ye |> addZeroes 1 |> reverse
+let sumOrSub (x:BigInt) (y:BigInt) operator = 
+    let xe, ye = equalize x.Bits y.Bits // выравниваем два числа
+    let mapped = map2 (fun x1 y1 -> operator (x.Sign * x1) (y.Sign * y1)) xe ye |> addZeroes 1 |> reverse // суммируем/вычитаем поразрядно
     match mapped with
     | One i -> if i < -9 then BigInt(-1, Cons(1, One (abs i%10))) elif i > 9 then BigInt(1, Cons(1, One (i%10))) else BigInt(sign i, One (abs i))
     | Cons(i, tail) ->
         let last = len mapped - 2
-        let _, _, folded = fold (fun (c, remainder, l) i ->
+        let _, _, folded = fold (fun (c, remainder, l) i -> // переносим остатки на следующие разряды
             let j = remainder + i
             if c = last && j < 0
             then
@@ -94,18 +94,18 @@ let mul (x:BigInt) (y:BigInt) =
     let rec go x y r rank =
         match y with
         | One y1 ->
-            let mapped = map (fun x1 -> x1 * y1 * rank) x |> addZeroes ((len y) + rank/10) |> reverse
+            let mapped = map (fun x1 -> x1 * y1 * rank) x |> addZeroes ((len y) + rank/10) |> reverse       // поразрядно умножаем
             match mapped with
             | Cons(x1, tail) ->
-                let _, folded = fold (fun (remainder, l) i ->
+                let _, folded = fold (fun (remainder, l) i ->       // переносим остатки
                     let j = remainder + i
                     (j / 10, Cons(j%10, l))) (x1/10, One (x1%10)) tail
                 (sum (BigInt(1, r)) (BigInt(1, delZeroHead folded))).Bits
         | Cons(y1, taily) -> 
-            let mapped = map (fun x1 -> x1 * y1 * rank) x |> addZeroes ((len y) + rank/10) |> reverse
+            let mapped = map (fun x1 -> x1 * y1 * rank) x |> addZeroes ((len y) + rank/10) |> reverse       // поразрядно умножаем
             match mapped with
             | Cons(x1, tailx) ->    
-                let _, folded = fold (fun (remainder, l) i ->
+                let _, folded = fold (fun (remainder, l) i ->       // переносим остатки
                     let j = remainder + i
                     (j / 10, Cons(j%10, l))) (x1/10, One (x1%10)) tailx
                 go x taily (sum (BigInt(1, r)) (BigInt(1, delZeroHead folded))).Bits (rank*10)
@@ -125,7 +125,7 @@ let mul (x:BigInt) (y:BigInt) =
             BigInt(x.Sign * y.Sign, go x.Bits (reverse y.Bits) (One 0) 1)
 
 let div (x:BigInt) (y:BigInt) =
-    let divide x y =
+    let divide x y =    // функция, находящая частное(от 0 до 9) и остаток от деления
         let mutable down = 1
         let mutable up = 10
         while up - down > 1 do
@@ -154,8 +154,8 @@ let div (x:BigInt) (y:BigInt) =
         if y.Bits = One 0 then failwith "Division by zero"
         else 
             let divLen = len y.Bits
-            let _, res, _, c = fold (fun (dividend, result, divLen, c) x1 ->
-                let newC = c + 1
+            let _, res, _, c = fold (fun (dividend, result, divLen, c) x1 ->    // отрезаем от делимого числа до тех пор, пока не получится
+                let newC = c + 1                                                // использовать divide и добавляем нули, если было занято более 1 разряда подряд
                 let newRes = if newC >= 2 then Cons(0, result) else result
                 let divd = concat dividend (One x1) |> delZeroHead
                 if notLesser divd y.Bits

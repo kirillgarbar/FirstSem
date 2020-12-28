@@ -60,6 +60,15 @@ let tests =
             Expect.isTrue (equal (BigInt(1, Cons(1, Cons(2, One 3)))) b1) "bigIntegerToBigInt is wrong"
             Expect.isTrue (equal (BigInt(-1, Cons(1, Cons(2, One 3)))) c1) "bigIntegerToBigInt is wrong"
 
+        testCase "notLesser test" <| fun _ ->
+            let a = Cons(1, Cons(1, One 0))
+            let b = Cons(1, Cons(1, One 0))
+            let c = Cons(1, Cons(0, One 9))
+            let d = Cons(9, One 9)
+            Expect.isTrue (notLesser a b) "notLesser is wrong"
+            Expect.isTrue (notLesser a c) "notLesser is wrong"
+            Expect.isTrue (notLesser a d) "notLesser is wrong"
+
         testCase "reverseSign test" <| fun _ ->
             let b = BigInt(-1, One 0)
             Expect.equal 1 (reverseSign b).Sign "reverseSign is wrong"
