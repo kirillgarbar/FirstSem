@@ -70,7 +70,7 @@ let tests =
         testProperty "equalize test" <| fun (a, b) ->
             let l1 = genRandomList a |> listToMyList
             let l2 = genRandomList b |> listToMyList
-            let eq1, eq2 = equalize l1 l2
+            let eq1, eq2 = equalize (l1, l2)
             Expect.equal (len eq1) (len eq2) "len eq1 =/= len eq2"
 
         testCase "delZeroHead test" <| fun _ ->

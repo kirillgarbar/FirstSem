@@ -16,7 +16,6 @@
     
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="QTMatrix.fs" />
     <Compile Include="BigInt.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Main.fs" />

@@ -60,7 +60,7 @@ let listToMyList l =
         go (List.rev l).Tail (One l.[l.Length - 1])
 
 let myListToList l =
-    fold (fun list x -> list @ [x]) [] l
+    (fold (fun list x -> x :: list) [] l) |> List.rev
 
 let stringToMyString s:MyString =
     listToMyList (Seq.toList s)
@@ -69,17 +69,21 @@ let myStringToString (s:MyString) =
     myListToList s |> List.toArray |> System.String |> string
 
 let reverse l =
-    l |> myListToList |> List.rev |> listToMyList
+    match l with
+    | One x -> l
+    | Cons(h, tail) -> fold (fun rl x -> Cons(x, rl)) (One h) tail
 
 let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
-    let rec go mapping (x:MyList<'t>) (y:MyList<'t>) (r:MyList<'t>) =
+    let rec go mapping (x:MyList<'t>) (y:MyList<'t>) =
         match x with
         | One x1 ->
             match y with
-            | One y1 -> concat r (One(mapping x1 y1))
+            | One y1 -> One (mapping x1 y1)
+            | Cons _ -> failwith "Impossible case"
         | Cons(x1, tailx) ->
             match y with
-            | Cons(y1, taily) -> go mapping tailx taily (concat r (One(mapping x1 y1)))
+            | One _ -> failwith "Impossible case"
+            | Cons(y1, taily) -> Cons(mapping x1 y1, go mapping tailx taily)
 
     if len x = len y
     then
@@ -89,11 +93,11 @@ let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
             | One y1 -> One(mapping x1 y1)
         | Cons(x1, tailx) ->
             match y with
-            | Cons(y1, taily) -> go mapping tailx taily (One(mapping x1 y1))
+            | Cons(y1, taily) -> go mapping x y
     else
         failwith "Length of lists should be equal"
 
-let equalize x y =  
+let equalize (x, y) = // добавляет нули в начало одного из списков, пока их длина разная
     let rec go x y dif =
         if dif = 0 then (x, y) elif dif < 0 then go (Cons(0, x)) y (dif + 1) else go x (Cons(0, y)) (dif - 1)
 
@@ -113,3 +117,21 @@ let intToMyList i =
 
 let rec addZeroes c l =
     if c <= 0 then l else addZeroes (c - 1) (Cons(0, l))
+
+let notLesser x y = // сравнивает списки в лексикографическом порядке
+    let lx = len x
+    let ly = len y
+    if lx <> ly
+    then
+        lx > ly
+    else
+        let rec go x y =    
+            match x with
+            | One x1 ->
+                match y with
+                | One y1 -> x1 >= y1
+            | Cons(x1, tailx) ->
+                match y with
+                | Cons(y1, taily) -> if x1 = y1 then go tailx taily else x1 >= y1
+
+        go x y

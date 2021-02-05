@@ -7,7 +7,7 @@ open System.Numerics
 
 let genRandomList() =
     let rnd = System.Random()
-    List.init (rnd.Next(1, 6)) (fun _ -> rnd.Next(9))
+    List.init (rnd.Next(1, 40)) (fun _ -> rnd.Next(9))
 
 let genRandomBigInteger() =
     fst (genRandomList() |> List.fold (fun (i, p) x -> (i + (BigInteger x)*p, p*(BigInteger 10))) (BigInteger 0, BigInteger 1))
@@ -15,7 +15,8 @@ let genRandomBigInteger() =
 let bigIntegerToBigInt (x:BigInteger) =
     let y = x |> string
     let newX = if y.[0] = '-' then y.[1..] else y
-    BigInt((if x >= BigInteger 0 then 1 else -1), newX |> List.ofSeq |> List.map (fun i -> i |> string |> int) |> listToMyList)
+    let list = newX |> List.ofSeq |> List.map (fun i -> i |> string |> int) |> listToMyList
+    BigInt((if x >= BigInteger 0 then 1 else -1), list)
 
 let rec equal (x:BigInt) (y:BigInt) =
     if x.Sign <> y.Sign
@@ -73,9 +74,6 @@ let tests =
             let b = BigInt(-1, One 0)
             Expect.equal 1 (reverseSign b).Sign "reverseSign is wrong"
 
-        testProperty "sign test" <| fun a ->
-            Expect.equal (if a >= 0 then 1 else -1) (sign a) "sign is wrong"
-
         testProperty "sum test" <| fun _ ->
             let x = genRandomBigInteger()
             let y = genRandomBigInteger()
@@ -111,7 +109,7 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "sub is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s2) sb2) "sub is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "sub is wrong"
-
+            
         testProperty "mul test" <| fun _ ->
             let x = genRandomBigInteger()
             let y = genRandomBigInteger()
@@ -129,7 +127,7 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "mul is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s2) sb2) "mul is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "mul is wrong"
-
+            
         testProperty "div test" <| fun _ ->
             let x = genRandomBigInteger()
             let y = genRandomBigInteger()
@@ -151,8 +149,10 @@ let tests =
                 Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "div is wrong"
             else
                 Expect.isTrue true ""
+
         testCase "div test. Division by zero" <| fun _ ->
             Expect.throws (fun _ -> div (BigInt(1, One 1)) (BigInt(1, One 0)) |> ignore) "Exception should be raised"
             Expect.throws (fun _ -> div (BigInt(1, Cons(1, One 1))) (BigInt(1, One 0)) |> ignore) "Exception should be raised"
             
     ]
+
