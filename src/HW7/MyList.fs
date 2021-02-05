@@ -91,8 +91,10 @@ let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
         | One x1 ->
             match y with
             | One y1 -> One(mapping x1 y1)
+            | Cons _ -> failwith "Impossible case"
         | Cons(x1, tailx) ->
             match y with
+            | One _ -> failwith "Impossible case"
             | Cons(y1, taily) -> go mapping x y
     else
         failwith "Length of lists should be equal"
@@ -130,8 +132,10 @@ let notLesser x y = // сравнивает списки в лексикогра
             | One x1 ->
                 match y with
                 | One y1 -> x1 >= y1
+                | Cons _ -> failwith "Impossible case"
             | Cons(x1, tailx) ->
                 match y with
+                | One _ -> failwith "Impossible case"
                 | Cons(y1, taily) -> if x1 = y1 then go tailx taily else x1 >= y1
 
         go x y
