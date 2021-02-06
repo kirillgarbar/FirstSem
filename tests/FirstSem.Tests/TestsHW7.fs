@@ -6,7 +6,7 @@ open Expecto
 
 let genRandomList count =
     let rnd = System.Random()
-    let c = if count = 0 then rnd.Next(1, 10) else abs count
+    let c = if count = 0 then rnd.Next(1, 100) else abs count
     List.init c (fun _ -> rnd.Next(100))
 
 [<Tests>]
@@ -67,18 +67,6 @@ let tests =
             let mappedml = map2 (fun i j -> i + j) (listToMyList l1) (listToMyList l2) |> myListToList
             Expect.sequenceEqual mappedml mappedl "List.map2 =/= map2"
 
-        testProperty "equalize test" <| fun (a, b) ->
-            let l1 = genRandomList a |> listToMyList
-            let l2 = genRandomList b |> listToMyList
-            let eq1, eq2 = equalize (l1, l2)
-            Expect.equal (len eq1) (len eq2) "len eq1 =/= len eq2"
-
-        testCase "delZeroHead test" <| fun _ ->
-            let l = genRandomList 5
-            let lc = concat (Cons(0, Cons(0, One 0))) (l |> listToMyList)
-            let r = delZeroHead lc |> myListToList
-            Expect.sequenceEqual l r "delZeroHead is wrong"
-
         testProperty "intToMyList test" <| fun _ ->
             let i = System.Random().Next(10000, 99999)
             let a = i |> string |> Array.ofSeq
@@ -86,10 +74,6 @@ let tests =
             let ml = i |> intToMyList |> myListToList
             Expect.sequenceEqual l ml "intToMyList is wrong"
 
-        testCase "addZeroes test" <| fun _ ->
-            let l = genRandomList 5 |> listToMyList |> addZeroes 3 |> myListToList
-            Expect.sequenceEqual l.[0..2] [0;0;0] "addZeroes is wrong"
-            
     ]
 
 [<Tests>]

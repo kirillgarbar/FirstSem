@@ -18,7 +18,6 @@
   <ItemGroup>
     <Compile Include="BigInt.fs" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Main.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
