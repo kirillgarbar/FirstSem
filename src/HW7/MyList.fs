@@ -99,43 +99,8 @@ let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
     else
         failwith "Length of lists should be equal"
 
-let equalize (x, y) = // добавляет нули в начало одного из списков, пока их длина разная
-    let rec go x y dif =
-        if dif = 0 then (x, y) elif dif < 0 then go (Cons(0, x)) y (dif + 1) else go x (Cons(0, y)) (dif - 1)
-
-    let dif = len x - len y
-    go x y dif
-    
-let rec delZeroHead l = // удаляет все нули из префикса списка
-    match l with
-    | One i -> l
-    | Cons(h, tail) -> if h = 0 then delZeroHead tail else l
-
 let intToMyList i =
     let rec go i r =
         if i = 0 then r else go (i/10) (Cons(i%10, r))
 
     go (i/10) (One(i%10))
-
-let rec addZeroes c l =
-    if c <= 0 then l else addZeroes (c - 1) (Cons(0, l))
-
-let notLesser x y = // сравнивает списки в лексикографическом порядке
-    let lx = len x
-    let ly = len y
-    if lx <> ly
-    then
-        lx > ly
-    else
-        let rec go x y =    
-            match x with
-            | One x1 ->
-                match y with
-                | One y1 -> x1 >= y1
-                | Cons _ -> failwith "Impossible case"
-            | Cons(x1, tailx) ->
-                match y with
-                | One _ -> failwith "Impossible case"
-                | Cons(y1, taily) -> if x1 = y1 then go tailx taily else x1 >= y1
-
-        go x y

@@ -16,32 +16,17 @@ let bigIntegerToBigInt (x:BigInteger) =
     let y = x |> string
     let newX = if y.[0] = '-' then y.[1..] else y
     let list = newX |> List.ofSeq |> List.map (fun i -> i |> string |> int) |> listToMyList
-    BigInt((if x >= BigInteger 0 then 1 else -1), list)
-
-let rec equal (x:BigInt) (y:BigInt) =
-    if x.Sign <> y.Sign
-    then
-        false
-    else
-    match x.Bits with
-    | One x1 ->
-        match y.Bits with
-        | One y1 -> if x1 = y1 then true else false
-        | Cons (_, _) -> false
-    | Cons(x1, tailx) ->
-        match y.Bits with
-        | One _ -> false
-        | Cons (y1, taily) -> if x1 <> y1 then false else equal (BigInt(1, tailx)) (BigInt(1, taily))
+    BigInt((if x >= BigInteger 0 then Positive else Negative), list)
 
 [<Tests>]
 let tests =
     testList "Tests for BigInt" [
         testCase "equal test" <| fun _ ->
-            let a = BigInt(1, Cons(1, One 2))
-            let a1 = BigInt(1, Cons(1, One 2))
-            let a2 = BigInt(-1, Cons(1, One 2))
-            let a3 = BigInt(1, Cons(1, One 1))
-            let a4 = BigInt(-1, Cons(1, One 1))
+            let a = BigInt(Positive, Cons(1, One 2))
+            let a1 = BigInt(Positive, Cons(1, One 2))
+            let a2 = BigInt(Negative, Cons(1, One 2))
+            let a3 = BigInt(Positive, Cons(1, One 1))
+            let a4 = BigInt(Negative, Cons(1, One 1))
             Expect.isTrue (equal a a1) "euqal is wrong"
             Expect.isFalse (equal a a2) "euqal are wrong"
             Expect.isFalse (equal a a3) "euqal are wrong"
@@ -54,12 +39,12 @@ let tests =
             let b1 = b |> bigIntegerToBigInt
             let c = -123 |> BigInteger
             let c1 = c |> bigIntegerToBigInt
-            Expect.equal 1 a1.Sign "Signs are wrong"
-            Expect.equal 1 b1.Sign "Signs are wrong"
-            Expect.equal -1 c1.Sign "Signs are wrong"
-            Expect.isTrue (equal (BigInt(1, One 0)) a1) "bigIntegerToBigInt is wrong"
-            Expect.isTrue (equal (BigInt(1, Cons(1, Cons(2, One 3)))) b1) "bigIntegerToBigInt is wrong"
-            Expect.isTrue (equal (BigInt(-1, Cons(1, Cons(2, One 3)))) c1) "bigIntegerToBigInt is wrong"
+            Expect.equal Positive a1.Sign "Signs are wrong"
+            Expect.equal Positive b1.Sign "Signs are wrong"
+            Expect.equal Negative c1.Sign "Signs are wrong"
+            Expect.isTrue (equal (BigInt(Positive, One 0)) a1) "bigIntegerToBigInt is wrong"
+            Expect.isTrue (equal (BigInt(Positive, Cons(1, Cons(2, One 3)))) b1) "bigIntegerToBigInt is wrong"
+            Expect.isTrue (equal (BigInt(Negative, Cons(1, Cons(2, One 3)))) c1) "bigIntegerToBigInt is wrong"
 
         testCase "notLesser test" <| fun _ ->
             let a = Cons(1, Cons(1, One 0))
@@ -71,9 +56,25 @@ let tests =
             Expect.isTrue (notLesser a d) "notLesser is wrong"
 
         testCase "reverseSign test" <| fun _ ->
-            let b = BigInt(-1, One 0)
-            Expect.equal 1 (reverseSign b).Sign "reverseSign is wrong"
+            let b = BigInt(Negative, One 0)
+            Expect.equal Positive (reverseSign b).Sign "reverseSign is wrong"
 
+        testProperty "equalize test" <| fun (a, b) ->
+            let l1 = genRandomList a |> listToMyList
+            let l2 = genRandomList b |> listToMyList
+            let eq1, eq2 = equalize (l1, l2)
+            Expect.equal (len eq1) (len eq2) "len eq1 =/= len eq2"
+
+        testCase "delZeroHead test" <| fun _ ->
+            let l = genRandomList()
+            let lc = concat (Cons(0, Cons(0, One 0))) (l |> listToMyList)
+            let r = delZeroHead lc |> myListToList
+            Expect.sequenceEqual l r "delZeroHead is wrong"
+
+        testCase "addZeroes test" <| fun _ ->
+            let l = genRandomList() |> listToMyList |> addZeroes 3 |> myListToList
+            Expect.sequenceEqual l.[0..2] [0;0;0] "addZeroes is wrong"
+            
         testProperty "sum test" <| fun _ ->
             let x = genRandomBigInteger()
             let y = genRandomBigInteger()
@@ -91,7 +92,7 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "sum is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s2) sb2) "sum is wrong"
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "sum is wrong"
-
+            
         testProperty "sub test" <| fun _ ->
             let x = genRandomBigInteger()
             let y = genRandomBigInteger()
@@ -151,8 +152,8 @@ let tests =
                 Expect.isTrue true ""
 
         testCase "div test. Division by zero" <| fun _ ->
-            Expect.throws (fun _ -> div (BigInt(1, One 1)) (BigInt(1, One 0)) |> ignore) "Exception should be raised"
-            Expect.throws (fun _ -> div (BigInt(1, Cons(1, One 1))) (BigInt(1, One 0)) |> ignore) "Exception should be raised"
+            Expect.throws (fun _ -> div (BigInt(Positive, One 1)) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
+            Expect.throws (fun _ -> div (BigInt(Positive, Cons(1, One 1))) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
             
     ]
 
