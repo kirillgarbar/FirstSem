@@ -15,7 +15,7 @@ type BigInt =
         Digits =
             if (fold (fun _ i -> i >= 0 && i <= 9) true b)
             then b
-            else failwith "Numbers should be in range 0..9"
+            else failwith "Digits should be in range 0..9"
         }
 
 let equal (x:BigInt) (y:BigInt) =
