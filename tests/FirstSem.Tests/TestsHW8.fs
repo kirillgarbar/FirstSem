@@ -66,7 +66,7 @@ let tests =
             Expect.equal (len eq1) (len eq2) "len eq1 =/= len eq2"
 
         testCase "delZeroHead test" <| fun _ ->
-            let l = genRandomList()
+            let l = genRandomList() |> listToMyList |> delZeroHead |> myListToList
             let lc = concat (Cons(0, Cons(0, One 0))) (l |> listToMyList)
             let r = delZeroHead lc |> myListToList
             Expect.sequenceEqual l r "delZeroHead is wrong"
@@ -154,6 +154,5 @@ let tests =
         testCase "div test. Division by zero" <| fun _ ->
             Expect.throws (fun _ -> div (BigInt(Positive, One 1)) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
             Expect.throws (fun _ -> div (BigInt(Positive, Cons(1, One 1))) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
-            
     ]
 

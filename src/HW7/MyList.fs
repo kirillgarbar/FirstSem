@@ -6,6 +6,14 @@ type MyList<'t> =
 
 type MyString = MyList<char>
 
+let head = function
+    | One x -> x
+    | Cons(x, _) -> x
+
+let tail = function
+    | One _ -> failwith "There's no tail"
+    | Cons(_, tail) -> tail
+
 let rec fold folder acc l  =
     match l with
     | One x -> folder acc x
