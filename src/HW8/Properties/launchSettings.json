@@ -2,7 +2,7 @@
   "profiles": {
     "FirstSem": {
       "commandName": "Project",
-      "commandLineArgs": "--arrayquicksort Input.txt Output.txt"
+      "commandLineArgs": "--allfib 10"
     }
   }
 }
