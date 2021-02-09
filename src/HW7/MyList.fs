@@ -62,10 +62,8 @@ let listToMyList l =
         | head :: tail -> go tail (Cons(head, ml))
 
     if List.isEmpty l
-    then
-        failwith "List should not be empty"
-    else
-        go (List.rev l).Tail (One l.[l.Length - 1])
+    then failwith "List should not be empty"
+    else go (List.rev l).Tail (One l.[l.Length - 1])
 
 let myListToList l =
     (fold (fun list x -> x :: list) [] l) |> List.rev
@@ -104,8 +102,7 @@ let map2 mapping (x:MyList<'t>) (y:MyList<'t>) =
             match y with
             | One _ -> failwith "Impossible case"
             | Cons(y1, taily) -> go mapping x y
-    else
-        failwith "Length of lists should be equal"
+    else failwith "Length of lists should be equal"
 
 let intToMyList i =
     let rec go i r =

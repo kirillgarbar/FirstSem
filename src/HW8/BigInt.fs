@@ -14,10 +14,8 @@ type BigInt =
         Sign = if b = One 0 then Positive else s
         Digits =
             if (fold (fun _ i -> i >= 0 && i <= 9) true b)
-            then
-                b
-            else
-                failwith "Numbers should be in range 0..9"
+            then b
+            else failwith "Numbers should be in range 0..9"
         }
 
 let equal (x:BigInt) (y:BigInt) =
@@ -43,7 +41,7 @@ let equalize (x, y) = // добавляет нули в начало одног�
     
 let rec delZeroHead l = // удаляет все нули из префикса списка
     match l with
-    | One i -> l
+    | One _ -> l
     | Cons(h, tail) -> if h = 0 then delZeroHead tail else l
 
 let rec addZeroes c l =
@@ -53,8 +51,7 @@ let notLesser x y = // возвращает true, если x >= y в лекси�
     let lx = len x
     let ly = len y
     if lx <> ly
-    then
-        lx > ly
+    then lx > ly
     else
         let rec go x y =    
             match x with
@@ -76,10 +73,8 @@ let rec private manageRemainders = function  // Проходит по списк
         let remainder, folded = fold (fun (r, res) x ->  
             let y = x + r
             if y >= 0
-            then
-                (y / 10, Cons(y % 10, res))
-            else
-                (-1, Cons(10 + y, res))) (if head >= 0 then (head / 10, One (head % 10)) else (-1, One (10 + head))) tail
+            then (y / 10, Cons(y % 10, res))
+            else (-1, Cons(10 + y, res))) (if head >= 0 then (head / 10, One (head % 10)) else (-1, One (10 + head))) tail
         delZeroHead (Cons(remainder, folded))
 
 let sumOrSub (x:BigInt) (y:BigInt) operator =
@@ -115,10 +110,8 @@ let div (x:BigInt) (y:BigInt) =
             let r = BigInt(Positive, intToMyList ((up + down) / 2))
             let f = (mul (BigInt(Positive, y)) r)
             if notLesser x f.Digits
-            then
-                down <- ((up + down) / 2)
-            else
-                up <- ((up + down) / 2)
+            then down <- ((up + down) / 2)
+            else up <- ((up + down) / 2)
         let quot = (up + down) / 2
         let quotXres = mul (BigInt(Positive, y)) (BigInt(Positive, One quot))
         let remainder = sub (BigInt(Positive, x)) quotXres
@@ -126,8 +119,7 @@ let div (x:BigInt) (y:BigInt) =
 
     let rSign = setSign(getSign x * getSign y)
     if y.Digits = One 0
-    then
-        failwith "Division by zero"
+    then failwith "Division by zero"
     else 
         let divisorLen = len y.Digits
         let _, res, _, c = fold (fun (dividend, result, divisorLen, c) x1 ->    // Отрезаем от делимого числа до тех пор, пока не получится...
@@ -138,7 +130,6 @@ let div (x:BigInt) (y:BigInt) =
             then
                 let m, rem = divide newDividend y.Digits
                 (rem, Cons(m, newRes), divisorLen, 0)
-            else
-                (newDividend, newRes, divisorLen, c + 1)) (One 0, One 0, divisorLen, 0) x.Digits
+            else (newDividend, newRes, divisorLen, c + 1)) (One 0, One 0, divisorLen, 0) x.Digits
         let newRes = addZeroes (if c > 0 then 1 else 0) res     // Если после последнего divide были заняты ещё разряды, необходимо добавить 0 в результат
         BigInt(rSign, newRes |> reverse |> delZeroHead)

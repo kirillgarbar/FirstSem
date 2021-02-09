@@ -148,8 +148,7 @@ let tests =
                 Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "div is wrong"
                 Expect.isTrue (equal (bigIntegerToBigInt s2) sb2) "div is wrong"
                 Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "div is wrong"
-            else
-                Expect.isTrue true ""
+            else Expect.isTrue true ""
 
         testCase "div test. Division by zero" <| fun _ ->
             Expect.throws (fun _ -> div (BigInt(Positive, One 1)) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
