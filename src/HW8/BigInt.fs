@@ -22,16 +22,14 @@ type BigInt =
 
 let equal (x:BigInt) (y:BigInt) =
     if x.Sign <> y.Sign || len x.Digits <> len y.Digits
-    then
-        false
-    else
-        map2 (fun x y -> x = y) x.Digits y.Digits |> fold (fun c x -> c && x) true
+    then false
+    else map2 (fun x y -> x = y) x.Digits y.Digits |> fold (&&) true
 
 let getSign (x:BigInt) =
     if x.Sign = Positive then 1 else -1
 
 let setSign x =
-    if x = 1 || x = 0 then Positive elif x = -1 then Negative else failwith "1 or -1 expected"
+    if x = 1 || x = 0 then Positive elif x = -1 then Negative else failwith "1, 0 or -1 expected"
 
 let reverseSign (x:BigInt) =
     BigInt((if x.Sign = Positive then Negative else Positive), x.Digits)
