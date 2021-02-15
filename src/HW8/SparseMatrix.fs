@@ -1,19 +1,24 @@
 module SparseMatrix
 
-type RCV<'t> =
-    val Row:int
+let roundToPowerOfTwo x =
+    let rec go r = if pown 2 r < x then go (r + 1) else r
+
+    pown 2 (go 0)
+
+type CRV<'t> =
     val Col:int
+    val Row:int
     val Value:'t
 
-    new(r, c, v) = {
-        Row = if r < 0 then failwith "Positive number expected" else r
-        Col = if c < 0 then failwith "Positive number expected" else c
+    new(c, r, v) = {
+        Col = if r < 0 then failwith "Positive number expected" else c
+        Row = if c < 0 then failwith "Positive number expected" else r
         Value = v }
 
 type SparseMatrix<'t> =
-    val Size:int * int
-    val List:list<RCV<'t>>
+    val Size:int
+    val List:list<CRV<'t>>
 
     new(s, l) = {
-        Size = s
-        List = if (List.fold (fun _ (x:RCV<'t>) -> x.Row < fst s && x.Col < snd s) true l) then l else failwith "Index is outside the bounds" }
+        Size = roundToPowerOfTwo s
+        List = if (List.fold (fun _ (x:CRV<'t>) -> x.Row < (roundToPowerOfTwo s) && x.Col < (roundToPowerOfTwo s)) true l) then l else failwith "Index is out of bounds" }
