@@ -18,7 +18,7 @@
   <ItemGroup>
     <Compile Include="BigInt.fs" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Group.fs" />
+    <Compile Include="AlgebraicStruct.fs" />
     <Compile Include="SparseMatrix.fs" />
     <Compile Include="QuadTreeMatrix.fs" />
     <None Include="App.config" />

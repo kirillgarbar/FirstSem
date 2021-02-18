@@ -1,7 +1,7 @@
 module QuadTreeMatrix
 
 open SparseMatrix
-open Group
+open AlgebraicStruct
 
 type Direction =
     | NW
@@ -9,7 +9,7 @@ type Direction =
     | SE
     | SW
 
-type QuadTree<'t when 't: equality> =
+type QuadTree<'t when 't : equality> =
     | None
     | Leaf of 't
     | Node of QuadTree<'t> * QuadTree<'t> * QuadTree<'t> * QuadTree<'t>
@@ -65,7 +65,21 @@ type QuadTree<'t when 't: equality> =
         | None, None, None, None -> None
         | _, _, _, _ -> Node(nw, ne, se, sw)
 
-    member this.set (crv:CRV<'t>) size =          
+type QuadTreeMatrix<'t when 't : equality> =
+    val Size:int
+    val Tree:QuadTree<'t>
+
+    new(s, t) = { Size = s; Tree = t }
+
+    override this.GetHashCode() =
+        hash (this.Size, this.Tree)
+
+    override this.Equals(t) =
+        match t with
+        | :? QuadTreeMatrix<'t> as t -> this.Tree = t.Tree && this.Size = t.Size
+        | _ -> false
+
+    member this.set (crv:CRV<'t>) =          
         let rec go center m currSize =           
             match currSize with
             | 1 -> Leaf crv.Value
@@ -75,10 +89,10 @@ type QuadTree<'t when 't: equality> =
                 let next = QuadTree.getTree m dir
                 m.placeTree (go newCenter next (currSize / 2)) dir
                
-        if crv.Col >= size || crv.Row >= size then failwith "Index is out of bounds"
-        else go (size/2, size/2) this size
+        if crv.Col >= this.Size || crv.Row >= this.Size then failwith "Index is out of bounds"
+        else  QuadTreeMatrix(this.Size, go (this.Size/2, this.Size/2) this.Tree this.Size)
 
-    member this.get coord size =
+    member this.get coord =
         let rec go center m currSize =
             match m with
             | None -> None
@@ -87,28 +101,30 @@ type QuadTree<'t when 't: equality> =
                 let dir = QuadTree.getDirection center (CRV(fst coord, snd coord, 1))
                 go (QuadTree<_>.getNewCenter center dir currSize) (QuadTree.getTree m dir) (currSize / 2)
 
-        if fst coord >= size || snd coord >= size then failwith "Index is out of bounds"
-        else go (size/2, size/2) this size
+        if fst coord >= this.Size || snd coord >= this.Size then failwith "Index is out of bounds"
+        else go (this.Size/2, this.Size/2) this.Tree this.Size
 
-    static member initQT (m:SparseMatrix<'t>) =
-        let rec go (l:list<CRV<'t>>) (result:QuadTree<'t>) =
+    static member initQTM (m:SparseMatrix<'t>) =
+        let rec go (l:list<CRV<'t>>) (result:QuadTreeMatrix<'t>) =
             match l with
             | [] -> result
-            | head :: tail -> go tail (result.set head m.Size)
+            | head :: tail -> go tail (result.set head)
     
-        if m.List.Length = 0 then None
+        if m.List.Length = 0 then QuadTreeMatrix(m.Size, None)
         else
-            let emptyM = Node(None, None, None, None)
+            let emptyM = QuadTreeMatrix(m.Size, Node(None, None, None, None))
             go m.List emptyM
 
-    static member sum (m1:QuadTree<'t>) (m2:QuadTree<'t>) (group:Group<'t>) =
+    static member sum (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct<'t>) =
         let sumOp, neutral =
-            match group with
+            match astruct with
             | Monoid x -> x.Sum, x.Neutral
             | SemiRing x -> x.Monoid.Sum, x.Monoid.Neutral
         let rec go m1 m2 = 
             match m1, m2 with
-            | Leaf x , Leaf y -> if sumOp x y = neutral then None else Leaf (sumOp x y)
+            | Leaf x , Leaf y ->
+                let r = sumOp x y
+                if r = neutral then None else Leaf r
             | x, None -> x
             | None, x -> x
             | Node(nw1, ne1, se1, sw1), Node(nw2, ne2, se2, sw2) ->
@@ -119,31 +135,33 @@ type QuadTree<'t when 't: equality> =
                 QuadTree<_>.matchTrees nw ne se sw
             | _, _ -> failwith "Different sizes of matrices"
 
-        go m1 m2 
+        QuadTreeMatrix(m1.Size, go m1.Tree m2.Tree) 
 
-    static member mul (m1:QuadTree<'t>) (m2:QuadTree<'t>) (group:Group<'t>) =
+    static member mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct<'t>) =
         let mulOp, neutral =
-            match group with
+            match astruct with
             | Monoid x -> x.Sum, x.Neutral
             | SemiRing x -> x.Mul, x.Monoid.Neutral
-        let rec go m1 m2 =
+        let rec go (m1:QuadTree<'t>) (m2:QuadTree<'t>) currSize =
             match m1, m2 with
-            | Leaf x, Leaf y -> if mulOp x y = neutral then None else Leaf (mulOp x y)
+            | Leaf x, Leaf y ->
+                let r = mulOp x y
+                if r = neutral then None else Leaf r
             | None, _ -> None
             | _, None -> None
             | Node(nw1, ne1, se1, sw1), Node(nw2, ne2, se2, sw2) ->
-                let nw = QuadTree.sum (go nw1 nw2) (go ne1 sw2) group
-                let ne = QuadTree.sum (go nw1 ne2) (go ne1 se2) group
-                let se = QuadTree.sum (go sw1 ne2) (go se1 se2) group
-                let sw = QuadTree.sum (go sw1 nw2) (go se1 sw2) group
-                QuadTree<_>.matchTrees nw ne se sw
+                let nw = QuadTreeMatrix.sum (QuadTreeMatrix(currSize, go nw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, go ne1 sw2 (currSize/2))) astruct
+                let ne = QuadTreeMatrix.sum (QuadTreeMatrix(currSize, go nw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, go ne1 se2 (currSize/2))) astruct
+                let se = QuadTreeMatrix.sum (QuadTreeMatrix(currSize, go sw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, go se1 se2 (currSize/2))) astruct
+                let sw = QuadTreeMatrix.sum (QuadTreeMatrix(currSize, go sw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, go se1 sw2 (currSize/2))) astruct
+                QuadTree<_>.matchTrees nw.Tree ne.Tree se.Tree sw.Tree
             | _, _ -> failwith "Different sizes of matrices"
 
-        go m1 m2
+        QuadTreeMatrix(m1.Size, go m1.Tree m2.Tree (m1.Size/2))
 
-    member this.scalarMul s (group:Group<'t>) =
+    member this.scalarMul s (astruct:AlgebraicStruct<'t>) =
         let mulOp, neutral =
-            match group with
+            match astruct with
             | Monoid x -> x.Sum, x.Neutral
             | SemiRing x -> x.Mul, x.Monoid.Neutral
         let rec go m =
@@ -157,13 +175,13 @@ type QuadTree<'t when 't: equality> =
                 let sw = go sw 
                 QuadTree<_>.matchTrees nw ne se sw
 
-        if neutral = s then None
-        else go this
+        if neutral = s then QuadTreeMatrix(this.Size, None)
+        else QuadTreeMatrix(this.Size, go this.Tree)
         
-    static member tensorMul (m1:QuadTree<'t>) (m2:QuadTree<'t>) group =
+    static member tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) group =
         let rec go m1 =
             match m1 with
-            | Leaf x -> m2.scalarMul x group
+            | Leaf x -> (m2.scalarMul x group).Tree
             | None -> None
             | Node(nw, ne, se, sw) ->
                 let nw = go nw
@@ -172,8 +190,9 @@ type QuadTree<'t when 't: equality> =
                 let sw = go sw
                 QuadTree<_>.matchTrees nw ne se sw
 
-        match m1, m2 with
-        | None, _ -> None
-        | _, None -> None
-        | _, _ -> go m1
+        let t =
+            match m1.Tree, m2.Tree with
+            | None, _ | _, None -> None
+            | _, _ -> go m1.Tree
+        QuadTreeMatrix(m1.Size * m2.Size, t)
         

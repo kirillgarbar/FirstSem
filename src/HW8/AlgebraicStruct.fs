@@ -1,4 +1,4 @@
-module Group
+module AlgebraicStruct
 
 type Monoid<'t> =
     val Sum: 't -> 't -> 't
@@ -10,6 +10,6 @@ type SemiRing<'t>  =
     val Mul: 't -> 't -> 't
     new (mon, mul) = { Monoid = mon; Mul = mul }
 
-type Group<'t> =
+type AlgebraicStruct<'t> =
     | Monoid of Monoid<'t>
     | SemiRing of SemiRing<'t>
