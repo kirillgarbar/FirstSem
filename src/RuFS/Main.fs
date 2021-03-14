@@ -11,7 +11,7 @@ type CLIArguments =
             match s with
             | Input _ -> "File to interpretate"
             | Calculate _ -> "Arithmetic expression to calculate and return the result"
-            | GetTree _ -> "Draws a tree of given arithmetic expression in file with given name"
+            | GetTree _ -> "Generates dot code which draws a tree of given arithmetic expression"
 
 open FSharp.Text.Lexing
 

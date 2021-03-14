@@ -5,12 +5,12 @@ open MyList
 open BigInt
 open System.Numerics
 
-let genRandomList() =
+let genRandomList l =
     let rnd = System.Random()
-    List.init (rnd.Next(1, 40)) (fun _ -> rnd.Next(9))
+    List.init (rnd.Next(1, l)) (fun _ -> rnd.Next(9))
 
-let genRandomBigInteger() =
-    fst (genRandomList() |> List.fold (fun (i, p) x -> (i + (BigInteger x)*p, p*(BigInteger 10))) (BigInteger 0, BigInteger 1))
+let genRandomBigInteger l =
+    fst (genRandomList l |> List.fold (fun (i, p) x -> (i + (BigInteger x)*p, p*(BigInteger 10))) (BigInteger 0, BigInteger 1))
 
 let bigIntegerToBigInt (x:BigInteger) =
     let y = x |> string
@@ -18,6 +18,14 @@ let bigIntegerToBigInt (x:BigInteger) =
     let list = newX |> List.ofSeq |> List.map (fun i -> i |> string |> int) |> listToMyList
     BigInt((if x >= BigInteger 0 then Positive else Negative), list)
 
+let intToBinary x =
+    let mutable r = if x = 0 then "0" else ""
+    let mutable c = x
+    while c > 0 do
+        r <- string (c % 2) + r
+        c <- c / 2
+    int64 r
+ 
 [<Tests>]
 let tests =
     testList "Tests for BigInt" [
@@ -60,24 +68,24 @@ let tests =
             Expect.equal Positive (reverseSign b).Sign "reverseSign is wrong"
 
         testProperty "equalize test" <| fun (a, b) ->
-            let l1 = genRandomList a |> listToMyList
-            let l2 = genRandomList b |> listToMyList
+            let l1 = TestsHW7.genRandomList a |> listToMyList
+            let l2 = TestsHW7.genRandomList b |> listToMyList
             let eq1, eq2 = equalize (l1, l2)
             Expect.equal (len eq1) (len eq2) "len eq1 =/= len eq2"
 
         testCase "delZeroHead test" <| fun _ ->
-            let l = genRandomList() |> listToMyList |> delZeroHead |> myListToList
+            let l = genRandomList 40 |> listToMyList |> delZeroHead |> myListToList
             let lc = concat (Cons(0, Cons(0, One 0))) (l |> listToMyList)
             let r = delZeroHead lc |> myListToList
             Expect.sequenceEqual l r "delZeroHead is wrong"
 
         testCase "addZeroes test" <| fun _ ->
-            let l = genRandomList() |> listToMyList |> addZeroes 3 |> myListToList
+            let l = genRandomList 40 |> listToMyList |> addZeroes 3 |> myListToList
             Expect.sequenceEqual l.[0..2] [0;0;0] "addZeroes is wrong"
             
         testProperty "sum test" <| fun _ ->
-            let x = genRandomBigInteger()
-            let y = genRandomBigInteger()
+            let x = genRandomBigInteger 40
+            let y = genRandomBigInteger 40
             let s = x + y
             let s1 = (BigInteger -1) * x + y
             let s2 = x + y * (BigInteger -1)
@@ -94,8 +102,8 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "sum is wrong"
             
         testProperty "sub test" <| fun _ ->
-            let x = genRandomBigInteger()
-            let y = genRandomBigInteger()
+            let x = genRandomBigInteger 40
+            let y = genRandomBigInteger 40
             let s = x - y
             let s1 = (BigInteger -1) * x - y
             let s2 = x - y * (BigInteger -1)
@@ -112,8 +120,8 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "sub is wrong"
             
         testProperty "mul test" <| fun _ ->
-            let x = genRandomBigInteger()
-            let y = genRandomBigInteger()
+            let x = genRandomBigInteger 40
+            let y = genRandomBigInteger 40
             let s = x * y
             let s1 = (BigInteger -1) * x * y
             let s2 = x * y * (BigInteger -1)
@@ -130,8 +138,8 @@ let tests =
             Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "mul is wrong"
             
         testProperty "div test" <| fun _ ->
-            let x = genRandomBigInteger()
-            let y = genRandomBigInteger()
+            let x = genRandomBigInteger 40
+            let y = genRandomBigInteger 40
             if y <> (BigInteger 0)
             then
                 let s = x / y
@@ -153,5 +161,44 @@ let tests =
         testCase "div test. Division by zero" <| fun _ ->
             Expect.throws (fun _ -> div (BigInt(Positive, One 1)) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
             Expect.throws (fun _ -> div (BigInt(Positive, Cons(1, One 1))) (BigInt(Positive, One 0)) |> ignore) "Exception should be raised"
-    ]
 
+        testProperty "rem test" <| fun _ ->
+            let x = genRandomBigInteger 40
+            let y = genRandomBigInteger 40
+            if y <> (BigInteger 0)
+            then
+                let s = x % y
+                let s1 = (BigInteger -1) * x % y
+                let s2 = x % (y * (BigInteger -1))
+                let s3 = (BigInteger -1) * x % (y * (BigInteger -1))
+                let x1 = x |> bigIntegerToBigInt
+                let y1 = y |> bigIntegerToBigInt
+                let sb = rem x1 y1
+                let sb1 = rem (reverseSign x1) y1
+                let sb2 = rem x1 (reverseSign y1)
+                let sb3 = rem (reverseSign x1) (reverseSign y1)
+                Expect.isTrue (equal (bigIntegerToBigInt s) sb) "rem is wrong"
+                Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "rem is wrong"
+                Expect.isTrue (equal (bigIntegerToBigInt s2) sb2) "rem is wrong"
+                Expect.isTrue (equal (bigIntegerToBigInt s3) sb3) "rem is wrong"
+            else Expect.isTrue true ""
+
+        testProperty "pow test" <| fun _ ->
+            let x = genRandomBigInteger 10
+            let y = System.Random().Next(4)
+            let s = BigInteger.Pow(x, y) 
+            let s1 = BigInteger.Pow(BigInteger -1 * x, y) 
+            let x1 = x |> bigIntegerToBigInt
+            let y1 = BigInt(Positive, One y)
+            let sb = power x1 y1 
+            let sb1 = power (reverseSign x1) y1
+            Expect.isTrue (equal (bigIntegerToBigInt s) sb) "pow is wrong"
+            Expect.isTrue (equal (bigIntegerToBigInt s1) sb1) "pow is wrong"
+
+        testProperty "toBinary test" <| fun _ ->
+            let x = System.Random().Next(10000) 
+            let s = x |> intToBinary |> BigInteger
+            let x1 = x |> BigInteger |> bigIntegerToBigInt
+            let sb = toBinary x1
+            Expect.isTrue (equal (bigIntegerToBigInt s) sb) "toBinary is wrong"
+    ]
