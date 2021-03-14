@@ -1,5 +1,4 @@
 {
-
 // Opens methods related to fslex.exe
 open FSharp.Text.Lexing
 
@@ -14,27 +13,32 @@ let lexeme x =
 let whitespace = [ ' ' '\t' ]
 let newline = ( '\n' | '\r' '\n' )
 
-let number = [ '0'-'9' ]*
+let number = ( '+' | '-' )? + [ '0'-'9' ]*
 
 let vname = '[' [ 'a'-'z' 'A'-'z' ]* ']'
 
-let operation = ( '+' | '-' | '*' | '/' )
-
 rule tokenStream = parse
-// --------------------------
-| number		{ Parser.NUM(int (LexBuffer<_>.LexemeString lexbuf)) }
 // --------------------------
 | whitespace	{ tokenStream lexbuf }
 | newline	{ tokenStream lexbuf }
 //---------------------------
+| '(' { Parser.LBR }
+| ')' { Parser.RBR }
 | '+' { Parser.SUM }
 | '-' { Parser.SUB }
 | '*' { Parser.MUL }
 | '/' { Parser.DIV }
 | '=' { Parser.EQ }
+| '|' { Parser.ABS }
+| '%' { Parser.REM }
+| '^' { Parser.POW }
+| '~' { Parser.BIN }
 | vname { Parser.VNAME(lexeme lexbuf) }
 | "let" { Parser.KW_LET }
 | "print" { Parser.KW_PRINT }
 // --------------------------
+| number		{ Parser.NUM(LexBuffer<_>.LexemeString lexbuf) }
+// --------------------------
 | _    		{ failwith ("Lexer error. Unexpected symbol: " + LexBuffer<_>.LexemeString lexbuf) }
 | eof   	{ Parser.EOF }
+

@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "Test": {
+    "RuFS2": {
       "commandName": "Project",
-      "commandLineArgs": "--input \"Example.txt\""
+      "commandLineArgs": "--calculate \"1 + 2 - 5 * 7 / 2 - |4 - 7|\""
     }
   }
 }

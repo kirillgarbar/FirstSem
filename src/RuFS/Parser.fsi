@@ -2,21 +2,33 @@
 module Parser
 type token = 
   | EOF
+  | ABS
+  | RBR
+  | LBR
   | EQ
   | KW_PRINT
   | KW_LET
   | VNAME of (string)
+  | BIN
+  | POW
+  | REM
   | DIV
   | MUL
   | SUB
   | SUM
-  | NUM of (int)
+  | NUM of (string)
 type tokenId = 
     | TOKEN_EOF
+    | TOKEN_ABS
+    | TOKEN_RBR
+    | TOKEN_LBR
     | TOKEN_EQ
     | TOKEN_KW_PRINT
     | TOKEN_KW_LET
     | TOKEN_VNAME
+    | TOKEN_BIN
+    | TOKEN_POW
+    | TOKEN_REM
     | TOKEN_DIV
     | TOKEN_MUL
     | TOKEN_SUB
@@ -29,6 +41,9 @@ type nonTerminalId =
     | NONTERM_start
     | NONTERM_stmt
     | NONTERM_expr
+    | NONTERM_rexpr
+    | NONTERM_baseAndPow
+    | NONTERM_power
     | NONTERM_vname
     | NONTERM_eof
 /// This function maps tokens to integer indexes

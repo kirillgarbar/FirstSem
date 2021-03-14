@@ -102,7 +102,7 @@ let mul (x:BigInt) (y:BigInt) =
 
     BigInt(setSign(getSign x * getSign y), result.Digits)
 
-let div (x:BigInt) (y:BigInt) =
+let divOrRem (x:BigInt) (y:BigInt) =
     let divide x y =            // Находит частное(от 0 до 9) и остаток от деления.
         let mutable down = 1    // Применяется только если длина делимого равна или больше на 1, чем у делителя
         let mutable up = 10
@@ -118,11 +118,10 @@ let div (x:BigInt) (y:BigInt) =
         (quot, remainder.Digits)
 
     let rSign = setSign(getSign x * getSign y)
-    if y.Digits = One 0
-    then failwith "Division by zero"
+    if y.Digits = One 0 then failwith "Division by zero"
     else 
         let divisorLen = len y.Digits
-        let _, res, _, c = fold (fun (dividend, result, divisorLen, c) x1 ->    // Отрезаем от делимого числа до тех пор, пока не получится...
+        let rem, res, _, c = fold (fun (dividend, result, divisorLen, c) x1 ->    // Отрезаем от делимого числа до тех пор, пока не получится...
             let newC = c + 1                                                    // ...использовать divide и добавляем нули, если было занято более 1 разряда за раз
             let newRes = if newC >= 2 then Cons(0, result) else result
             let newDividend = concat dividend (One x1) |> delZeroHead
@@ -131,5 +130,47 @@ let div (x:BigInt) (y:BigInt) =
                 let m, rem = divide newDividend y.Digits
                 (rem, Cons(m, newRes), divisorLen, 0)
             else (newDividend, newRes, divisorLen, c + 1)) (One 0, One 0, divisorLen, 0) x.Digits
-        let newRes = addZeroes (if c > 0 then 1 else 0) res     // Если после последнего divide были заняты ещё разряды, необходимо добавить 0 в результат
-        BigInt(rSign, newRes |> reverse |> delZeroHead)
+        let newRes = addZeroes (if c > 0 then 1 else 0) res |> reverse |> delZeroHead    // Если после последнего divide были заняты ещё разряды, необходимо добавить 0 в результат
+        (rem, newRes)
+
+let div (x:BigInt) (y:BigInt) =
+    let rSign = setSign(getSign x * getSign y)
+    let res = snd (divOrRem x y)
+    BigInt(rSign, res)
+
+let rem (x:BigInt) (y:BigInt) =
+    let res = fst (divOrRem x y)
+    BigInt(x.Sign, res)
+
+let power (n:BigInt) (pow:BigInt) =
+    let rec go r (p:BigInt) =
+        match p.Digits with
+        | One 0 -> BigInt(Positive, One 1)
+        | One 1 -> r
+        | _ -> go (mul r n) (sub p (BigInt(Positive, One 1)))
+
+    if pow.Sign = Negative then failwith "Positive power expected"
+    else go n pow
+
+let toBinary (x:BigInt) =
+    let rec go l r =
+        match l with
+        | One 0 -> r
+        | _ ->
+            let rem, divd = divOrRem (BigInt(Positive, l)) (BigInt(Positive, One 2))
+            go divd (Cons(head rem, r))
+
+    let rem, divd = divOrRem (BigInt(Positive, x.Digits)) (BigInt(Positive, One 2))
+    BigInt(x.Sign, go divd (One(head rem)))
+
+let stringToBigInt (n:string) =
+    let s = if n.[0] = '-' then Negative else Positive
+    let l = n |> List.ofSeq |> List.map (string)
+    let ml = (if l.[0] = "+" || l.[0] = "-" then l.[1..] else l) |> List.map (int) |> listToMyList
+    BigInt(s, ml)
+
+let bigIntToString (n:BigInt) =
+    let r = n.Digits |> fold (fun acc x -> acc + string x) ""
+    if n.Sign = Negative then "-" + r else r
+
+let abs (x:BigInt) = BigInt(Positive, x.Digits)
