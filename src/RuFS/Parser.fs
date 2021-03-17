@@ -367,7 +367,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 45 "Parser.fsy"
-                                AST.Num(_1)
+                                AST.Num(BigInt.stringToBigInt _1)
                    )
 # 45 "Parser.fsy"
                  : 'power));

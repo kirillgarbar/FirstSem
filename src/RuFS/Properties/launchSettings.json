@@ -2,7 +2,7 @@
   "profiles": {
     "RuFS2": {
       "commandName": "Project",
-      "commandLineArgs": "--calculate \"1 + 2 - 5 * 7 / 2 - |4 - 7|\""
+      "commandLineArgs": "--todotstring \"let x = 12 / 4 let y = 4 + 5 let z = x - y print z\" \"test.txt\""
     }
   }
 }

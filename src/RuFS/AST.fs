@@ -3,7 +3,7 @@ module AST
 type VName = Var of string
 
 type Expression =
-    | Num of string
+    | Num of BigInt.BigInt
     | NVar of VName
     | Sum of Expression * Expression
     | Sub of Expression * Expression

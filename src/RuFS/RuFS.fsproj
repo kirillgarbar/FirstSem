@@ -13,6 +13,7 @@
       <Compile Include="Parser.fs" />
       <Compile Include="Lexer.fs" />
       <Compile Include="Interpreter.fs" />
+      <Compile Include="DrawTree.fs" />
       <Compile Include="Main.fs" />
   </ItemGroup>
 

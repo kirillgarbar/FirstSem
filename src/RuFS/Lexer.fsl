@@ -5,17 +5,15 @@ open FSharp.Text.Lexing
 let newline (lexbuf: LexBuffer<_>) =
   lexbuf.StartPos <- lexbuf.StartPos.NextLine
 
-let lexeme x =
-    let s = LexBuffer<_>.LexemeString x
-    s.Substring(1, s.Length - 2)
+let lexeme x = LexBuffer<_>.LexemeString x
 }
 
 let whitespace = [ ' ' '\t' ]
 let newline = ( '\n' | '\r' '\n' )
 
-let number = ( '+' | '-' )? + [ '0'-'9' ]*
+let number = ( '+' | '-' )? + [ '0'-'9' ]+
 
-let vname = '[' [ 'a'-'z' 'A'-'z' ]* ']'
+let vname = [ 'a'-'z' 'A'-'z' ]+
 
 rule tokenStream = parse
 // --------------------------
@@ -33,9 +31,9 @@ rule tokenStream = parse
 | '%' { Parser.REM }
 | '^' { Parser.POW }
 | '~' { Parser.BIN }
-| vname { Parser.VNAME(lexeme lexbuf) }
 | "let" { Parser.KW_LET }
 | "print" { Parser.KW_PRINT }
+| vname { Parser.VNAME(lexeme lexbuf) }
 // --------------------------
 | number		{ Parser.NUM(LexBuffer<_>.LexemeString lexbuf) }
 // --------------------------

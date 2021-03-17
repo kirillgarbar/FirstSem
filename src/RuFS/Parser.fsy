@@ -42,7 +42,7 @@ baseAndPow: power {$1}
     
 power: LBR expr RBR {$2}  
     | ABS expr ABS {AST.Abs $2}
-    | NUM {AST.Num($1)}
+    | NUM {AST.Num(BigInt.stringToBigInt $1)}
     | vname {AST.NVar($1)} 
     | BIN expr {AST.Bin $2}
 
