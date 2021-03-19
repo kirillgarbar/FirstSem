@@ -4,22 +4,18 @@ open Argu
 open DrawTree
 
 type CLIArguments =
-    | ComputeFile of file:string
-    | ComputeString of code:string
-    | ToDotFile of file:string * output:string
-    | ToDotString of code:string * output:string
-    | ComputeAndDotFile of file:string * output:string
-    | ComputeAndDotString of code:string * output:string
+    | InputFile of file:string
+    | InputString of code:string
+    | Compute
+    | ToDot of output:string
 
     interface IArgParserTemplate with
         member s.Usage =
             match s with
-            | ComputeFile _ -> "File to interpretate"
-            | ComputeString _ -> "Calculate and return the result of given code" 
-            | ToDotFile _ -> "Generates dot code from file which draws a tree of given arithmetic expression"
-            | ToDotString _ -> "Generates dot code from given code which draws a tree of given arithmetic expression"
-            | ComputeAndDotFile _ -> "Computes and generates dot code from file"
-            | ComputeAndDotString _ -> "Computes and generates dot code from given code"
+            | InputFile _ -> "File with code"
+            | InputString _ -> "String of code" 
+            | Compute -> "Return the result of interptetation of given code"
+            | ToDot _ -> "Generates dot code of syntax tree to the given file"
 
 open FSharp.Text.Lexing
 
@@ -32,32 +28,15 @@ let parse text =
 let main (argv: string array) =
     let parser = ArgumentParser.Create<CLIArguments>(programName = "Arithmetics interpreter")
     let results = parser.Parse(argv)
-    match parser.ParseCommandLine argv with
-    | p when p.Contains(ComputeFile) ->
-        let file = results.GetResult ComputeFile
-        let ast = parse (System.IO.File.ReadAllText file)
-        Interpreter.run ast
-    | p when p.Contains(ComputeString) ->
-        let expr = results.GetResult ComputeString
-        let full_expr = parse expr
-        printfn "%s" (Interpreter.calculate full_expr |> BigInt.bigIntToString)
-    | p when p.Contains(ToDotFile) ->
-        let file, output = results.GetResult ToDotFile
-        let ast = parse (System.IO.File.ReadAllText file)
-        drawTree ast output
-    | p when p.Contains(ToDotString) ->
-        let code, output = results.GetResult ToDotString
-        drawTree (parse code) output
-    | p when p.Contains(ComputeAndDotFile) ->
-        let file, output = results.GetResult ComputeAndDotFile
-        let ast = parse (System.IO.File.ReadAllText file)
-        Interpreter.run ast
-        drawTree ast output
-    | p when p.Contains(ComputeAndDotString) ->
-        let code, output = results.GetResult ComputeAndDotString
-        let ast = parse code
-        drawTree ast output
-        Interpreter.run ast
-    | _ -> parser.PrintUsage() |> printfn "%s"
+    let p = parser.ParseCommandLine argv
+    if argv.Length = 0 || results.IsUsageRequested then parser.PrintUsage() |> printfn "%s"
+    else 
+        let input =
+            if p.Contains(InputFile) then System.IO.File.ReadAllText (results.GetResult InputFile)
+            elif p.Contains(InputString) then results.GetResult InputString
+            else failwith "No input code given"
+        let ast = parse input
+        if p.Contains(Compute) then Interpreter.run ast
+        if p.Contains(ToDot) then drawTree ast (results.GetResult ToDot)
     0
     

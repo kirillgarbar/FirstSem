@@ -1,6 +1,6 @@
 %start start
 
-%token <string> NUM
+%token <BigInt.BigInt> NUM
 %token SUM
 %token SUB
 %token MUL
@@ -16,7 +16,7 @@
 %token RBR
 %token ABS
 
-%token EOF
+%token EOF 
 
 %type < AST.Program > start
 
@@ -42,7 +42,7 @@ baseAndPow: power {$1}
     
 power: LBR expr RBR {$2}  
     | ABS expr ABS {AST.Abs $2}
-    | NUM {AST.Num(BigInt.stringToBigInt $1)}
+    | NUM {AST.Num($1)}
     | vname {AST.NVar($1)} 
     | BIN expr {AST.Bin $2}
 

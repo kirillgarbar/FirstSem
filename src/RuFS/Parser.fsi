@@ -16,7 +16,7 @@ type token =
   | MUL
   | SUB
   | SUM
-  | NUM of (string)
+  | NUM of (BigInt.BigInt)
 type tokenId = 
     | TOKEN_EOF
     | TOKEN_ABS

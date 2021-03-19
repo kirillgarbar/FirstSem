@@ -5,12 +5,12 @@ open Expecto
 // tests for printing and variable declaring
 let pr1 =
     """
-    let [x] = -2
-    let [y] = 7
-    let [z] = [x] + [y] * 3
-    print [x]
-    print [y]
-    print [z]
+    let x = -2
+    let y = 7
+    let z = x + y * 3
+    print x
+    print y
+    print z
     """
 Interpreter.run (Main.parse pr1)
 printfn "Expected \n-2\n7\n19"
@@ -29,15 +29,21 @@ let tests =
 
         testCase "Power priority test" <| fun _ ->                
             let pp = "let x = 2 / 2 ^ 3"
-            Expect.equal "0" (Interpreter.calculate (Main.parse pp) |> BigInt.bigIntToString) "Common case 1 is wrong"
+            Expect.equal "0" (Interpreter.calculate (Main.parse pp) |> BigInt.bigIntToString) "Power priority is wrong"
 
         testCase "Unary minus test" <| fun _ ->                
             let um = "let x = 17 + -42 + +2"
-            Expect.equal "-23" (Interpreter.calculate (Main.parse um) |> BigInt.bigIntToString) "Common case 1 is wrong"
+            Expect.equal "-23" (Interpreter.calculate (Main.parse um) |> BigInt.bigIntToString) "Unary minus is wrong"
 
         testCase "Zero division test" <| fun _ ->                
-            let zd = "let [x] = 13 / (5 - 5)"
+            let zd = "let x = 13 / (5 - 5)"
             Expect.throws (fun _ -> (Interpreter.calculate (Main.parse zd)) |> ignore) "Exception should be raised"
+
+        testCase "Wrong number test" <| fun _ ->                
+            let wn = "let x = -014"
+            let wn2 = "let x = 00"
+            Expect.throws (fun _ -> (Interpreter.calculate (Main.parse wn)) |> ignore) "Exception should be raised"
+            Expect.throws (fun _ -> (Interpreter.calculate (Main.parse wn2)) |> ignore) "Exception should be raised"
 
         testCase "Calculation test. Common case 1" <| fun _ ->
             let cc1 = "let x = 12 + 3 - 5 + 12 - 25 * (25 + 3) / 14 - 14 * 6 + 7 / 12 - 12 / 2 / 2"
