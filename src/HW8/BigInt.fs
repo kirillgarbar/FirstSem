@@ -147,7 +147,11 @@ let power (n:BigInt) (pow:BigInt) =
         match p.Digits with
         | One 0 -> BigInt(Positive, One 1)
         | One 1 -> r
-        | _ -> go (mul r n) (sub p (BigInt(Positive, One 1)))
+        | _ ->
+            let rm, dv = divOrRem p (BigInt(Positive, One 2))
+            let div = BigInt(Positive, dv)
+            let nr = go r div
+            if rm = One 0 then mul nr nr else mul n (mul nr nr) 
 
     if pow.Sign = Negative then failwith "Positive power expected"
     else go n pow
