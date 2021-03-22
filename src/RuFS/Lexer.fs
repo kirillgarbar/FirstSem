@@ -175,7 +175,7 @@ and tokenStream  lexbuf =
           )
   | 16 -> ( 
 # 40 "Lexer.fsl"
-                           Parser.NUM(LexBuffer<_>.LexemeString lexbuf |> BigInt.stringToBigInt) 
+                           Parser.NUM((LexBuffer<_>.LexemeString lexbuf).Trim() |> BigInt.stringToBigInt) 
 # 179 "Lexer.fs"
           )
   | 17 -> ( 
