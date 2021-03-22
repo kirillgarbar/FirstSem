@@ -13,8 +13,7 @@ let newline = ( '\n' | '\r' '\n' )
 
 let sign = ( '+' | '-' )?
 let digits = [ '1'-'9' ]+ + [ '0'-'9' ]*
-let number = sign + ('0' | digits) 
-let wrongNumber = sign + '0' + [ '0'-'9' ]+
+let number = sign + ('0' ' ' | digits)
 
 let vname = [ 'a'-'z' 'A'-'z' ]+
 
@@ -38,7 +37,6 @@ rule tokenStream = parse
 | "print" { Parser.KW_PRINT }
 | vname { Parser.VNAME(lexeme lexbuf) }
 // --------------------------
-| wrongNumber		{ failwith "Number should not contain other digits after zero"}
 | number		{ Parser.NUM(LexBuffer<_>.LexemeString lexbuf |> BigInt.stringToBigInt) }
 // --------------------------
 | _    		{ failwith ("Lexer error. Unexpected symbol: " + LexBuffer<_>.LexemeString lexbuf) }

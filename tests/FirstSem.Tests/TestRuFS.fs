@@ -41,7 +41,7 @@ let tests =
 
         testCase "Wrong number test" <| fun _ ->                
             let wn = "let x = -014"
-            let wn2 = "let x = 00"
+            let wn2 = "let x = 00 + 2"
             Expect.throws (fun _ -> (Interpreter.calculate (Main.parse wn)) |> ignore) "Exception should be raised"
             Expect.throws (fun _ -> (Interpreter.calculate (Main.parse wn2)) |> ignore) "Exception should be raised"
 
