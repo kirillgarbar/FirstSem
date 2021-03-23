@@ -1,0 +1,44 @@
+{
+// Opens methods related to fslex.exe
+open FSharp.Text.Lexing
+
+let newline (lexbuf: LexBuffer<_>) =
+  lexbuf.StartPos <- lexbuf.StartPos.NextLine
+
+let lexeme x = LexBuffer<_>.LexemeString x
+}
+
+let whitespace = [ ' ' '\t' ]
+let newline = ( '\n' | '\r' '\n' )
+
+let sign = ( '+' | '-' )?
+let digits = [ '1'-'9' ]+ + [ '0'-'9' ]*
+let number = sign + ('0' ' ' | digits)
+
+let vname = [ 'a'-'z' 'A'-'z' ]+
+
+rule tokenStream = parse
+// --------------------------
+| whitespace	{ tokenStream lexbuf }
+| newline	{ tokenStream lexbuf } 
+//---------------------------
+| '(' { Parser.LBR }
+| ')' { Parser.RBR }
+| '+' { Parser.SUM }
+| '-' { Parser.SUB }
+| '*' { Parser.MUL }
+| '/' { Parser.DIV }
+| '=' { Parser.EQ }
+| '|' { Parser.ABS }
+| '%' { Parser.REM }
+| '^' { Parser.POW }
+| '~' { Parser.BIN }
+| "let" { Parser.KW_LET }
+| "print" { Parser.KW_PRINT }
+| vname { Parser.VNAME(lexeme lexbuf) }
+// --------------------------
+| number		{ Parser.NUM((LexBuffer<_>.LexemeString lexbuf).Trim() |> BigInt.stringToBigInt) }
+// --------------------------
+| _    		{ failwith ("Lexer error. Unexpected symbol: " + LexBuffer<_>.LexemeString lexbuf) }
+| eof   	{ Parser.EOF }
+

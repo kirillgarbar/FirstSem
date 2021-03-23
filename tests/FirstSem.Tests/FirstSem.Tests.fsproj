@@ -5,12 +5,14 @@
         <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
-    	<Compile Include="TestsHW8.fs" />
-    	<Compile Include="TestsHW7.fs" />
-    	<Compile Include="TestsHW6.fs" />
-    	<Compile Include="TestsHW4.fs" />
-    	<Compile Include="TestsHW3.fs" />
         <Compile Include="TestsHW2.fs" />
+        <Compile Include="TestsHW3.fs" />
+        <Compile Include="TestsHW4.fs" />
+        <Compile Include="TestsHW6.fs" />
+        <Compile Include="TestsHW7.fs" />
+        <Compile Include="TestsHW8.fs" />
+        <Compile Include="QuadTreeTest.fs" />
+        <Compile Include="TestRuFS.fs" />
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
@@ -20,6 +22,7 @@
         <ProjectReference Include="..\..\src\HW6\HW6.fsproj" />
         <ProjectReference Include="..\..\src\HW7\HW7.fsproj" />
         <ProjectReference Include="..\..\src\HW8\HW8.fsproj" />
+        <ProjectReference Include="..\..\src\RuFS\RuFS.fsproj" />
     </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

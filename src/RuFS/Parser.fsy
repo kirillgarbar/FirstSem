@@ -1,0 +1,51 @@
+%start start
+
+%token <BigInt.BigInt> NUM
+%token SUM
+%token SUB
+%token MUL
+%token DIV
+%token REM
+%token POW
+%token BIN
+%token <string> VNAME
+%token KW_LET
+%token KW_PRINT
+%token EQ
+%token LBR
+%token RBR
+%token ABS
+
+%token EOF 
+
+%type < AST.Program > start
+
+%%
+
+start: stmt {[$1]}
+     | stmt start {$1 :: $2}
+
+stmt: KW_PRINT vname {AST.Print($2)}
+    | KW_LET vname EQ expr {AST.VDecl($2,$4)}
+
+expr: rexpr {$1}
+    | expr SUM rexpr {AST.Sum($1, $3)}
+    | expr SUB rexpr {AST.Sub($1, $3)}
+
+rexpr: baseAndPow {$1}
+    | rexpr MUL baseAndPow {AST.Mul($1, $3)}
+    | rexpr DIV baseAndPow {AST.Div($1, $3)}
+    | rexpr REM baseAndPow {AST.Rem($1, $3)}
+
+baseAndPow: power {$1}
+    | baseAndPow POW power {AST.Pow($1, $3)}
+    
+power: LBR expr RBR {$2}  
+    | ABS expr ABS {AST.Abs $2}
+    | NUM {AST.Num($1)}
+    | vname {AST.NVar($1)} 
+    | BIN expr {AST.Bin $2}
+
+vname: VNAME {AST.Var($1)}
+
+eof: EOF {1}

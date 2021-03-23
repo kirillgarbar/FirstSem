@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup>
@@ -18,6 +18,9 @@
   <ItemGroup>
     <Compile Include="BigInt.fs" />
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AlgebraicStruct.fs" />
+    <Compile Include="SparseMatrix.fs" />
+    <Compile Include="QuadTreeMatrix.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
