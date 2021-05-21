@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:AvaloniaEditDemo.ViewModels;assembly=AvaloniaEditDemo"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:AvalonEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+        x:Class="AvaloniaEditDemo.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="JBKiller">
+
+    <Grid>
+		<Grid Margin="0, 0, 100, 65">
+			<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+				<Grid>
+					<StackPanel Name="BreakpointPanel"
+								Background="Pink"
+								HorizontalAlignment="Left"
+								Width="20"/>
+					<AvalonEdit:TextEditor  Margin="20, 0, 0, 0"
+											Name="CodeBox"
+											LineNumbersForeground="Black"
+											TextBlock.FontSize="14"/>
+				</Grid>
+			</ScrollViewer>
+		</Grid>
+		<TextBox Name="ConsoleBox" 
+				 Height="65" 
+				 Margin="0,0,100,0" 
+				 TextWrapping="NoWrap" 
+				 VerticalAlignment="Bottom" 
+				 IsReadOnly="True"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" 
+				 ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+		<StackPanel HorizontalAlignment="Right">
+            <Button Click="LoadB_Click" Content="Load File" Width="100"/>
+            <Button Click="SaveB_Click" Content="Save File" Width="100"/>
+            <Button Click="RunB_Click" Content="Run" Width="100"/>
+            <CheckBox Name="DebugCheck" Content="Debug" IsChecked="False" IsThreeState="False"/>
+            <Button Name="ContinueB" Click="ContinueB_Click" Content="Continue" Width="100"/>
+            <Image Source="/Assets/Icon1.png" Width="100"/>
+            <Image Source="/Assets/Icon2.png" Width="100"/>
+            <Image Source="/Assets/Icon3.png" Width="100"/>
+            <Image Source="/Assets/Icon4.png" Width="100"/>
+            <Image Source="/Assets/Icon5.png" Width="100"/>
+            <Image Source="/Assets/Icon6.png" Width="100"/>
+            <Image Source="/Assets/Icon7.png" Width="100"/>
+            <Image Source="/Assets/Icon8.png" Width="100"/>
+		</StackPanel>
+    </Grid>
+
+</Window>
