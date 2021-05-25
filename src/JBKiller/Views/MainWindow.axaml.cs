@@ -36,7 +36,7 @@ namespace AvaloniaEditDemo.Views
 
             // syntax highlighting
             using (StreamReader s =
-            new StreamReader(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/ArithmHighLighting.xshd"))
+            new StreamReader(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName + "/ArithmHighlighting.xshd"))
             {
                 using (XmlTextReader reader = new XmlTextReader(s))
                 {
