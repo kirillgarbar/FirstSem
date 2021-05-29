@@ -10,7 +10,12 @@
         Title="JBKiller">
 
     <Grid>
-		<Grid Margin="0, 0, 100, 65">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="0.15*" />
+        </Grid.RowDefinitions>
+		<Grid Grid.Row="0" Margin="0, 0, 100, 0">
 			<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
 				<Grid>
 					<StackPanel Name="BreakpointPanel"
@@ -24,14 +29,16 @@
 				</Grid>
 			</ScrollViewer>
 		</Grid>
-		<TextBox Name="ConsoleBox" 
-				 Height="65" 
-				 Margin="0,0,100,0" 
-				 TextWrapping="NoWrap" 
-				 VerticalAlignment="Bottom" 
-				 IsReadOnly="True"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto" 
-				 ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        <GridSplitter Grid.Row="1" ResizeDirection="Rows"/>
+        <Grid Grid.Row="2">
+		    <TextBox Name="ConsoleBox" 
+                     Grid.Row="2"
+				     Margin="0,0,100,0" 
+				     TextWrapping="NoWrap" 
+				     IsReadOnly="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" 
+				     ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        </Grid>
 		<StackPanel HorizontalAlignment="Right">
             <Button Click="LoadB_Click" Content="Load File" Width="100"/>
             <Button Click="SaveB_Click" Content="Save File" Width="100"/>
