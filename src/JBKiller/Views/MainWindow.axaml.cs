@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Threading;
 using AvaloniaEdit;
 using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Highlighting.Xshd;
@@ -21,6 +23,7 @@ namespace AvaloniaEditDemo.Views
         private readonly StackPanel _breakpointPanel;
         private readonly CheckBox _debugCheck;
         private Queue<string> debugQueue;
+        private readonly Button _continueB;
         public MainWindow()
         {
             InitializeComponent();
@@ -29,6 +32,7 @@ namespace AvaloniaEditDemo.Views
             _codeBox = this.FindControl<TextEditor>("CodeBox");
             _breakpointPanel = this.Find<StackPanel>("BreakpointPanel");
             _debugCheck = this.FindControl<CheckBox>("DebugCheck");
+            _continueB = this.FindControl<Button>("ContinueB");
 
             _codeBox.TextChanged += CodeBox_TextChanged;
             _codeBox.Background = Brushes.Transparent;
@@ -72,7 +76,7 @@ namespace AvaloniaEditDemo.Views
                 var res = "";
                 foreach (string s in arr)
                 {
-                    res += s[..(s.Length - 1)] + " ";
+                    if (s.Length > 0) res += s[..(s.Length - 1)] + " ";
                 }
                 return res;
             }
@@ -82,7 +86,7 @@ namespace AvaloniaEditDemo.Views
                 var result = new Queue<string> { };
                 for (int i = 0; i < bpIndices.Length; i++)
                 {
-                    result.Enqueue(arrayToString(lines[0..bpIndices[i]])); //////////
+                    result.Enqueue(arrayToString(lines[0..bpIndices[i]]));
                 }
                 result.Enqueue(code);
                 return result;
@@ -92,16 +96,38 @@ namespace AvaloniaEditDemo.Views
                 if (_debugCheck.IsChecked == true) // Не бейте, он иначе на нулл ругается
                 {
                     var bpIndices = getBreakpointIndices(_breakpointPanel.Children);
-                    debugQueue = getSlicesOfCodeByBreakpoints(_codeBox.Text, bpIndices);
-                    var d = Interpreter.run(Main.parse(debugQueue.Dequeue()));
-                    var x = dictToString(d.Item2);
-                    if (x != null) _consoleBox.Text = x;
+                    var code = _codeBox.Text;
+                    var task = new Task<Tuple<string, Queue<string>>>(() =>
+                    {
+                        var debugQueue = getSlicesOfCodeByBreakpoints(code, bpIndices);
+                        var d = Interpreter.run(Main.parse(debugQueue.Dequeue()));
+                        return Tuple.Create(dictToString(d.Item2), debugQueue);
+                    }
+                    );
+                    task.ContinueWith(x =>
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            var resString = x.Result.Item1;
+                            if (resString != null) _consoleBox.Text = resString;
+                            debugQueue = x.Result.Item2;
+                        }));
+                    task.Start();                    
                 }
                 else
                 {
-                    var d = Interpreter.run(Main.parse(_codeBox.Text));
-                    var x = d.Item3["print"];
-                    if (x != null) _consoleBox.Text = x;
+                    var code = _codeBox.Text;
+                    var task = new Task<string>(() =>
+                    {
+                        var d = Interpreter.run(Main.parse(code));
+                        return d.Item3["print"];
+                    }
+                    );
+                    task.ContinueWith(x =>
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (x.Result != null) _consoleBox.Text = x.Result;
+                        }));
+                    task.Start();
                 }
             }
             catch (Exception ex)
@@ -116,20 +142,27 @@ namespace AvaloniaEditDemo.Views
 
                 if (_debugCheck.IsChecked == true)
                 {
-                    var d = Interpreter.run(Main.parse(debugQueue.Dequeue()));
-                    var x = dictToString(d.Item2);
-                    if (x != null) _consoleBox.Text = x;
-                }
-                else
-                {
-                    var d = Interpreter.run(Main.parse(_codeBox.Text));
-                    var x = d.Item3["print"];
-                    if (x != null) _consoleBox.Text = x;
+                    _continueB.IsEnabled = false;
+                    var currentSlice = debugQueue.Dequeue();
+                    var task = new Task<string>(() =>
+                    {
+                        var d = Interpreter.run(Main.parse(currentSlice));
+                        return dictToString(d.Item2);
+                    }
+                    );
+                    task.ContinueWith(x =>
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            if (x.Result != null) _consoleBox.Text = x.Result;
+                            _continueB.IsEnabled = true;
+                        }));
+                    task.Start();
                 }
             }
             catch (Exception ex)
             {
                 _consoleBox.Text = ex.Message;
+                _continueB.IsEnabled = true;
             }
         }
         async private void SaveB_Click(object sender, RoutedEventArgs e)
