@@ -76,13 +76,13 @@ namespace AvaloniaEditDemo.Views
                 var res = "";
                 foreach (string s in arr)
                 {
-                    if (s.Length > 0) res += s[..(s.Length - 1)] + " ";
+                    if (s.Length > 0) res += s + " ";
                 }
                 return res;
             }
             Queue<string> getSlicesOfCodeByBreakpoints(string code, int[] bpIndices)
             {
-                var lines = code.Split("\n");
+                var lines = code.Split(Environment.NewLine);
                 var result = new Queue<string> { };
                 for (int i = 0; i < bpIndices.Length; i++)
                 {
@@ -97,7 +97,7 @@ namespace AvaloniaEditDemo.Views
                 {
                     var bpIndices = getBreakpointIndices(_breakpointPanel.Children);
                     var code = _codeBox.Text;
-                    var task = new Task<Tuple<string, Queue<string>>>(() =>
+                    var task = new Task<Tuple<string, Queue<string>>>(() =>    
                     {
                         var debugQueue = getSlicesOfCodeByBreakpoints(code, bpIndices);
                         var d = Interpreter.run(Main.parse(debugQueue.Dequeue()));
@@ -107,9 +107,16 @@ namespace AvaloniaEditDemo.Views
                     task.ContinueWith(x =>
                         Dispatcher.UIThread.Post(() =>
                         {
-                            var resString = x.Result.Item1;
-                            if (resString != null) _consoleBox.Text = resString;
-                            debugQueue = x.Result.Item2;
+                            try
+                            {
+                                var resString = x.Result.Item1;
+                                if (resString != null) _consoleBox.Text = resString;
+                                debugQueue = x.Result.Item2;
+                            }
+                            catch (Exception ex)
+                            {
+                                _consoleBox.Text = ex.Message;
+                            }
                         }));
                     task.Start();                    
                 }
@@ -125,7 +132,14 @@ namespace AvaloniaEditDemo.Views
                     task.ContinueWith(x =>
                         Dispatcher.UIThread.Post(() =>
                         {
-                            if (x.Result != null) _consoleBox.Text = x.Result;
+                            try
+                            {
+                                if (x.Result != null) _consoleBox.Text = x.Result;
+                            }
+                            catch (Exception ex)
+                            {
+                                _consoleBox.Text = ex.Message;
+                            }
                         }));
                     task.Start();
                 }
@@ -139,8 +153,7 @@ namespace AvaloniaEditDemo.Views
         {
             try
             {
-
-                if (_debugCheck.IsChecked == true)
+                if (_debugCheck.IsChecked == true && debugQueue != null)
                 {
                     _continueB.IsEnabled = false;
                     var currentSlice = debugQueue.Dequeue();
