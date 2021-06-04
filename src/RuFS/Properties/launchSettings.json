@@ -1,8 +1,7 @@
 {
   "profiles": {
     "RuFS2": {
-      "commandName": "Project",
-      "commandLineArgs": "--todotstring \"let x = 12 / 4 let y = 4 + 5 let z = x - y print z\" \"test.txt\""
+      "commandName": "Project"
     }
   }
 }
