@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ReactiveUI;
 
-namespace AvaloniaEditDemo.ViewModels
+namespace JBKiller.ViewModels
 {
     public class ViewModelBase : ReactiveObject
     {

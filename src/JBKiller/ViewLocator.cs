@@ -4,9 +4,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using AvaloniaEditDemo.ViewModels;
+using JBKiller.ViewModels;
 
-namespace AvaloniaEditDemo
+namespace JBKiller
 {
     public class ViewLocator : IDataTemplate
     {

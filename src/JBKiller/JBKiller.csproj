@@ -12,9 +12,10 @@
       <SubType>Designer</SubType>
     </AvaloniaResource>
     <AvaloniaResource Include="Assets\**" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
-	<PackageReference Include="CalcFSharp" Version="1.0.2" />
+	<PackageReference Include="CalcFSharp" Version="1.0.4" />
     <PackageReference Include="Avalonia" Version="0.10.0-rc1" />
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="0.10.0-rc1" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0-rc1" />

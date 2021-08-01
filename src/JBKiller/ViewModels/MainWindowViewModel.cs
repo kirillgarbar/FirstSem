@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AvaloniaEditDemo.ViewModels
+namespace JBKiller.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {

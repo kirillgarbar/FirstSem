@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using AvaloniaEditDemo.ViewModels;
-using AvaloniaEditDemo.Views;
+using JBKiller.ViewModels;
+using JBKiller.Views;
 
-namespace AvaloniaEditDemo
+namespace JBKiller
 {
     public class App : Application
     {
