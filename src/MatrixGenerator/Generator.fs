@@ -17,7 +17,7 @@ module Generator =
     let matrixToString (a:string [][]) = Array.fold (fun s i -> s + (Array.fold (fun s1 j -> s1 + j + " ") "" i).Trim() + "\n") "" a
     
     let generateMatrix rows cols sparcity valueGenerator =
-        if rows = 0 || cols = 0 then failwith "Size should be positive"
+        if rows <= 0 || cols <= 0 then failwith "Size should be positive"
         if sparcity > 100 || sparcity < 0 then failwith "Sparcity should be between 0 and 100"
 
         let mutable nonZeroElementCount = if sparcity = 100 then 0 else rows * cols / (100 / (100 - sparcity))
