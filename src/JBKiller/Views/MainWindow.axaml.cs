@@ -26,6 +26,8 @@ namespace JBKiller.Views
         private readonly Button _stopB;
         private readonly Button _runB;
         private string openedFilePath;
+        private Dictionary<string, string> variablesDict = new();
+        private Dictionary<Exp.VName, Exp.Expression> intepreterDict = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -56,12 +58,7 @@ namespace JBKiller.Views
         {
             AvaloniaXamlLoader.Load(this);
         }
-        private string DictToString(Dictionary<string, string> d)
-        {
-            var res = "";
-            foreach (string key in d.Keys) res += key + " = " + d[key] + "\n";
-            return res;
-        }
+        private string DictToString(Dictionary<string, string> d) { return string.Join(Environment.NewLine, d); }
         private void PaintBlueBreakpointInRed()
         {
             foreach (Button butt in _breakpointPanel.Children)
@@ -115,14 +112,16 @@ namespace JBKiller.Views
             _runB.IsEnabled = true;
             _codeBox.IsReadOnly = false;
             _debugCheck.IsEnabled = true;
+            intepreterDict.Clear();
+            variablesDict.Clear();
             PaintBlueBreakpointInRed();
         }
         private void RunB_Click(object sender, RoutedEventArgs e)
         {
-            int[] getBreakpointIndices(Controls buttons)
+            int[] getBreakpointIndices(Controls buttons) // Numbers of lines with breakpoints
             {
                 var line = 0;
-                var bpIndices = new List<int> { };
+                var bpIndices = new List<int> { 0 };
                 foreach (Button butt in _breakpointPanel.Children)
                 {
                     if (butt.Background == Brush.Parse("Red")) bpIndices.Add(line);
@@ -130,18 +129,13 @@ namespace JBKiller.Views
                 }
                 return bpIndices.ToArray();
             }
-            string arrayToString(string[] arr)
-            {
-                var res = "";
-                foreach (string s in arr) if (s.Length > 0) res += s + " ";
-                return res;
-            }
+            string arrayToString(string[] arr)  { return String.Join(" ", arr); }
             Queue<string> getSlicesOfCodeByBreakpoints(string code, int[] bpIndices)
             {
                 var lines = code.Split(Environment.NewLine);
                 var result = new Queue<string> { };
-                for (int i = 0; i < bpIndices.Length; i++) result.Enqueue(arrayToString(lines[0..bpIndices[i]]));
-                result.Enqueue(code);
+                for (int i = 1; i < bpIndices.Length; i++) result.Enqueue(arrayToString(lines[bpIndices[i-1]..bpIndices[i]]));
+                result.Enqueue(arrayToString(lines[bpIndices[^1]..])); // Slice from last breakpoint to the end of code
                 return result;
             }
             void continueDebug()
@@ -150,17 +144,19 @@ namespace JBKiller.Views
                 var currentSlice = debugQueue.Dequeue();
                 if (currentSlice.Trim() != "")
                 {
-                    var task = new Task<string>(() =>
+                    var task = new Task<Interpreter.Dicts>(() =>
                     {
-                        var d = Interpreter.run(Main.parse(currentSlice));
-                        return DictToString(d.Item2);
+                        return Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(currentSlice));
                     });
                     task.ContinueWith(x =>
                         Dispatcher.UIThread.Post(() =>
                         {
                             try
                             {
-                                if (x.Result != null) _consoleBox.Text = x.Result;
+                                var res = x.Result;
+                                variablesDict = res.VariablesDictionary;
+                                intepreterDict = res.InterpretedDictionary;
+                                if (variablesDict.Count > 0) _consoleBox.Text = DictToString(variablesDict);
                                 _runB.IsEnabled = true;
                             }
                             catch (Exception ex)
@@ -172,16 +168,20 @@ namespace JBKiller.Views
                     task.Start();
                     PaintNextBreakpoint(false);
                 }
+                else
+                {
+                    _runB.IsEnabled = true;
+                }
             }
             void startDebug()
             {
                 var bpIndices = getBreakpointIndices(_breakpointPanel.Children);
                 var code = _codeBox.Text;
-                var task = new Task<Tuple<string, Queue<string>>>(() =>
+                var task = new Task<Tuple<Interpreter.Dicts, Queue<string>>>(() =>
                 {
                     var debugQueue = getSlicesOfCodeByBreakpoints(code, bpIndices);
-                    var d = Interpreter.run(Main.parse(debugQueue.Dequeue()));
-                    return Tuple.Create(DictToString(d.Item2), debugQueue);
+                    var d = Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(debugQueue.Dequeue()));
+                    return Tuple.Create(d, debugQueue);
                 }
                 );
                 task.ContinueWith(x =>
@@ -189,9 +189,11 @@ namespace JBKiller.Views
                     {
                         try
                         {
-                            var resString = x.Result.Item1;
-                            if (resString != null) _consoleBox.Text = resString;
-                            debugQueue = x.Result.Item2;
+                            var res = x.Result;
+                            variablesDict = res.Item1.VariablesDictionary;
+                            intepreterDict = res.Item1.InterpretedDictionary;
+                            if (variablesDict.Count > 0) _consoleBox.Text = DictToString(variablesDict);
+                            debugQueue = res.Item2;
                         }
                         catch (Exception ex)
                         {
@@ -207,8 +209,8 @@ namespace JBKiller.Views
                 var code = _codeBox.Text;
                 var task = new Task<string>(() =>
                 {
-                    var d = Interpreter.run(Main.parse(code));
-                    return d.Item3["print"];
+                    var d = Interpreter.runPrint(Main.parse(code));
+                    return d["print"];
                 }
                 );
                 task.ContinueWith(x =>
