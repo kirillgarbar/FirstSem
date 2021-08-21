@@ -171,6 +171,7 @@ namespace JBKiller.Views
                 else
                 {
                     _runB.IsEnabled = true;
+                    PaintNextBreakpoint(false);
                 }
             }
             void startDebug()
@@ -180,8 +181,16 @@ namespace JBKiller.Views
                 var task = new Task<Tuple<Interpreter.Dicts, Queue<string>>>(() =>
                 {
                     var debugQueue = getSlicesOfCodeByBreakpoints(code, bpIndices);
-                    var d = Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(debugQueue.Dequeue()));
-                    return Tuple.Create(d, debugQueue);
+                    var currentSlice = debugQueue.Dequeue().Trim();
+                    if (currentSlice != "") 
+                    {
+                        var d = Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(currentSlice));
+                        return Tuple.Create(d, debugQueue); 
+                    }
+                    else
+                    {
+                        return Tuple.Create(new Interpreter.Dicts(variablesDict, intepreterDict), debugQueue);
+                    }
                 }
                 );
                 task.ContinueWith(x =>
