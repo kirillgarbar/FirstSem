@@ -223,7 +223,7 @@ namespace JBKiller.Views
                     {
                         try
                         {
-                            if (x.Result != null) _consoleBox.Text = x.Result;
+                            _consoleBox.Text = "Interpretation is finished!" + Environment.NewLine + x.Result;
                             _runB.IsEnabled = true;
                         }
                         catch (Exception ex)
