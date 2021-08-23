@@ -246,6 +246,7 @@ namespace JBKiller.Views
                 {
                     LeaveDebugMode(new Object(), new RoutedEventArgs());
                     _consoleBox.Text = ex.Message;
+                    _runB.IsEnabled = true;
                 }
             }
         }
