@@ -101,7 +101,6 @@ namespace JBKiller.Views
             debugQueue = null;
             _stopB.IsEnabled = false;
             _runB.Content = "Run";
-            _runB.IsEnabled = true;
             _codeBox.IsReadOnly = false;
             _debugCheck.IsEnabled = true;
             intepreterDict.Clear();
@@ -155,6 +154,7 @@ namespace JBKiller.Views
                             {
                                 LeaveDebugMode(new Object(), new RoutedEventArgs());
                                 _consoleBox.Text = ex.Message;
+                                _runB.IsEnabled = true;
                             }
                         }));
                     task.Start();
@@ -202,6 +202,7 @@ namespace JBKiller.Views
                         {
                             LeaveDebugMode(new Object(), new RoutedEventArgs());
                             _consoleBox.Text = ex.Message;
+                            _runB.IsEnabled = true;
                         }
                     }));
                 task.Start();
