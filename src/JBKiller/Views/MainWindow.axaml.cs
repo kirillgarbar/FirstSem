@@ -80,18 +80,10 @@ namespace JBKiller.Views
                     butt.Background = Brush.Parse("Red");
                     blueBPPassed = true;
                 }
-                else if (butt.Background == Brush.Parse("Red"))
+                else if ((butt.Background == Brush.Parse("Red")) && (blueBPPassed || startOfDebug))
                 {
-                    if (blueBPPassed)
-                    {
-                        butt.Background = Brush.Parse("Blue");
-                        return;
-                    }
-                    else if (startOfDebug)
-                    {
-                        butt.Background = Brush.Parse("Blue");
-                        return;
-                    }
+                    butt.Background = Brush.Parse("Blue");
+                    return;
                 }
             }
             PaintBlueBreakpointInRed(); // If debug is finished
