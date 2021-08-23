@@ -168,6 +168,7 @@ namespace JBKiller.Views
             }
             void startDebug()
             {
+                _runB.IsEnabled = false;
                 var bpIndices = getBreakpointIndices(_breakpointPanel.Children);
                 var code = _codeBox.Text;
                 var task = new Task<Tuple<Interpreter.Dicts, Queue<string>>>(() =>
@@ -190,11 +191,12 @@ namespace JBKiller.Views
                     {
                         try
                         {
-                            var res = x.Result;
+                            var res = x.Result;           
                             variablesDict = res.Item1.VariablesDictionary;
                             intepreterDict = res.Item1.InterpretedDictionary;
                             if (variablesDict.Count > 0) _consoleBox.Text = DictToString(variablesDict);
                             debugQueue = res.Item2;
+                            _runB.IsEnabled = true;
                         }
                         catch (Exception ex)
                         {
@@ -207,6 +209,7 @@ namespace JBKiller.Views
             }
             void executeCode()
             {
+                _runB.IsEnabled = false;
                 var code = _codeBox.Text;
                 var task = new Task<string>(() =>
                 {
@@ -220,10 +223,12 @@ namespace JBKiller.Views
                         try
                         {
                             if (x.Result != null) _consoleBox.Text = x.Result;
+                            _runB.IsEnabled = true;
                         }
                         catch (Exception ex)
                         {
                             _consoleBox.Text = ex.Message;
+                            _runB.IsEnabled = true;
                         }
                     }));
                 task.Start();
