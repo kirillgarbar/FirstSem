@@ -234,6 +234,7 @@ namespace JBKiller.Views
                     }));
                 task.Start();
             }
+            _consoleBox.Text = "";
             if (_codeBox.Text.Trim() != "")
             {
                 try
