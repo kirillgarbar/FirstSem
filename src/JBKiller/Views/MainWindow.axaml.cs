@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -22,9 +23,9 @@ namespace JBKiller.Views
         private readonly TextBox _consoleBox;
         private readonly StackPanel _breakpointPanel;
         private readonly CheckBox _debugCheck;
-        private Queue<string> debugQueue;
         private readonly Button _stopB;
         private readonly Button _runB;
+        private int debugLine = 0;
         private string openedFilePath;
         private Dictionary<string, string> variablesDict = new();
         private Dictionary<Exp.VName, Exp.Expression> intepreterDict = new();
@@ -70,38 +71,17 @@ namespace JBKiller.Views
                 }
             }
         }
-        private void PaintNextBreakpoint(bool startOfDebug)
-        {
-            var blueBPPassed = false;
-            foreach (Button butt in _breakpointPanel.Children)
-            {
-                if (butt.Background == Brush.Parse("Blue"))
-                {
-                    butt.Background = Brush.Parse("Red");
-                    blueBPPassed = true;
-                }
-                else if ((butt.Background == Brush.Parse("Red")) && (blueBPPassed || startOfDebug))
-                {
-                    butt.Background = Brush.Parse("Blue");
-                    return;
-                }
-            }
-            PaintBlueBreakpointInRed(); // If debug is finished
-        }
         private void EnterDebugMode()
         {
             _stopB.IsEnabled = true;
             _runB.Content = "Continue";
-            _codeBox.IsReadOnly = true;
             _debugCheck.IsEnabled = false;
-            PaintNextBreakpoint(true);
         }
         private void LeaveDebugMode(object sender, RoutedEventArgs e)
         {
-            debugQueue = null;
+            debugLine = 0;
             _stopB.IsEnabled = false;
             _runB.Content = "Run";
-            _codeBox.IsReadOnly = false;
             _debugCheck.IsEnabled = true;
             intepreterDict.Clear();
             variablesDict.Clear();
@@ -109,80 +89,46 @@ namespace JBKiller.Views
         }
         private void RunB_Click(object sender, RoutedEventArgs e)
         {
-            int[] getBreakpointIndices(Controls buttons) // Numbers of lines with breakpoints
+            string getNextSliceOfCode(string code)
             {
+                string arrayToString(string[] a) { return String.Join(" ", a.Select(line => line.Trim())); }
                 var line = 0;
-                var bpIndices = new List<int> { 0 };
+                var codeArray = code.Split("\n");
                 foreach (Button butt in _breakpointPanel.Children)
                 {
-                    if (butt.Background == Brush.Parse("Red")) bpIndices.Add(line);
+                    if (line == debugLine && butt.Background == Brush.Parse("Blue"))
+                    {
+                        butt.Background = Brush.Parse("Red");
+                    }
+                    else if (line > debugLine && butt.Background == Brush.Parse("Red"))
+                    {
+                        butt.Background = Brush.Parse("Blue");
+                        var slice = arrayToString(codeArray[debugLine..line]);
+                        debugLine = line;
+                        return slice.Trim();
+                    }
                     line++;
                 }
-                return bpIndices.ToArray();
+                var lastSlice = arrayToString(codeArray[debugLine..]);
+                debugLine = -1; // If this happens, the returned slice is the last slice of code to be executed and debug must stop
+                return lastSlice.Trim();
             }
-            string arrayToString(string[] arr)  { return String.Join(" ", arr); }
-            Queue<string> getSlicesOfCodeByBreakpoints(string code, int[] bpIndices)
-            {
-                var lines = code.Split(Environment.NewLine);
-                var result = new Queue<string> { };
-                for (int i = 1; i < bpIndices.Length; i++) result.Enqueue(arrayToString(lines[bpIndices[i-1]..bpIndices[i]]));
-                result.Enqueue(arrayToString(lines[bpIndices[^1]..])); // Slice from last breakpoint to the end of code
-                return result;
-            }
-            void continueDebug()
+            void executeDebug()
             {
                 _runB.IsEnabled = false;
-                var currentSlice = debugQueue.Dequeue();
-                if (currentSlice.Trim() != "")
+                if (debugLine == 0) EnterDebugMode();
+                var slice = getNextSliceOfCode(_codeBox.Text);
+                _consoleBox.Text = "Please wait for finish...\n";
+                var task = new Task<Interpreter.Dicts>(() =>
                 {
-                    var task = new Task<Interpreter.Dicts>(() =>
+                    if (slice != "") 
                     {
-                        return Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(currentSlice));
-                    });
-                    task.ContinueWith(x =>
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            try
-                            {
-                                var res = x.Result;
-                                variablesDict = res.VariablesDictionary;
-                                intepreterDict = res.InterpretedDictionary;
-                                if (variablesDict.Count > 0) _consoleBox.Text = DictToString(variablesDict);
-                                _runB.IsEnabled = true;
-                            }
-                            catch (Exception ex)
-                            {
-                                LeaveDebugMode(new Object(), new RoutedEventArgs());
-                                _consoleBox.Text = ex.Message;
-                                _runB.IsEnabled = true;
-                            }
-                        }));
-                    task.Start();
-                    PaintNextBreakpoint(false);
-                }
-                else
-                {
-                    _runB.IsEnabled = true;
-                    PaintNextBreakpoint(false);
-                }
-            }
-            void startDebug()
-            {
-                _runB.IsEnabled = false;
-                var bpIndices = getBreakpointIndices(_breakpointPanel.Children);
-                var code = _codeBox.Text;
-                var task = new Task<Tuple<Interpreter.Dicts, Queue<string>>>(() =>
-                {
-                    var debugQueue = getSlicesOfCodeByBreakpoints(code, bpIndices);
-                    var currentSlice = debugQueue.Dequeue().Trim();
-                    if (currentSlice != "") 
-                    {
-                        var d = Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(currentSlice));
-                        return Tuple.Create(d, debugQueue); 
+                        var d = Interpreter.runVariables(new(variablesDict, intepreterDict), Main.parse(slice));
+                        return d; 
                     }
                     else
                     {
-                        return Tuple.Create(new Interpreter.Dicts(variablesDict, intepreterDict), debugQueue);
+                        return new Interpreter.Dicts(variablesDict, intepreterDict);
                     }
                 }
                 );
@@ -192,26 +138,25 @@ namespace JBKiller.Views
                         try
                         {
                             var res = x.Result;           
-                            variablesDict = res.Item1.VariablesDictionary;
-                            intepreterDict = res.Item1.InterpretedDictionary;
-                            if (variablesDict.Count > 0) _consoleBox.Text = DictToString(variablesDict);
-                            debugQueue = res.Item2;
-                            _runB.IsEnabled = true;
+                            variablesDict = res.VariablesDictionary;
+                            intepreterDict = res.InterpretedDictionary;
+                            _consoleBox.Text += DictToString(variablesDict) + "\nStep of debug is finished!";
+                            if (debugLine == -1) LeaveDebugMode(new Object(), new RoutedEventArgs());
                         }
                         catch (Exception ex)
                         {
                             LeaveDebugMode(new Object(), new RoutedEventArgs());
                             _consoleBox.Text = ex.Message;
-                            _runB.IsEnabled = true;
                         }
+                        _runB.IsEnabled = true;
                     }));
                 task.Start();
-                EnterDebugMode();
             }
             void executeCode()
             {
                 _runB.IsEnabled = false;
                 var code = _codeBox.Text;
+                _consoleBox.Text = "Interpretation is started! Please wait for finish...\n";
                 var task = new Task<string>(() =>
                 {
                     var d = Interpreter.runPrint(Main.parse(code));
@@ -223,14 +168,13 @@ namespace JBKiller.Views
                     {
                         try
                         {
-                            _consoleBox.Text = "Interpretation is finished!" + Environment.NewLine + x.Result;
-                            _runB.IsEnabled = true;
+                            _consoleBox.Text += x.Result + "Interpretation is finished!";
                         }
                         catch (Exception ex)
                         {
                             _consoleBox.Text = ex.Message;
-                            _runB.IsEnabled = true;
                         }
+                        _runB.IsEnabled = true;
                     }));
                 task.Start();
             }
@@ -239,8 +183,7 @@ namespace JBKiller.Views
             {
                 try
                 {
-                    if (debugQueue != null) continueDebug();
-                    else if (_debugCheck.IsChecked == true) startDebug(); // Don't kill me, this is null check
+                    if (_debugCheck.IsChecked == true) executeDebug(); // Don't kill me, this is null check
                     else executeCode();
                 }
                 catch (Exception ex)
@@ -261,9 +204,13 @@ namespace JBKiller.Views
         async private void LoadB_Click(object sender, RoutedEventArgs e)
         {
             var ofd = new OpenFileDialog();
+            ofd.Filters.Add(new FileDialogFilter() { Name = "Txt", Extensions = { "txt" } });
             var path = await ofd.ShowAsync(this);
-            openedFilePath = path[0];
-            if (path.Length > 0) _codeBox.Text = File.ReadAllText(path[0]);
+            if (path.Length > 0)
+            {
+                _codeBox.Text = File.ReadAllText(path[0]);
+                openedFilePath = path[0];
+            }
         }
         public void CodeBox_TextChanged(object sender, EventArgs e)
         {
@@ -288,16 +235,13 @@ namespace JBKiller.Views
                     if (i > 0) button.Click += breakPoint_Click;
                     void breakPoint_Click(object sender, RoutedEventArgs e)
                     {
-                        if (debugQueue == null)
+                        if (button.Background == Brush.Parse("Green"))
                         {
-                            if (button.Background == Brush.Parse("Green"))
-                            {
-                                button.Background = Brush.Parse("Red");
-                            }
-                            else
-                            {
-                                button.Background = Brush.Parse("Green");
-                            }
+                            button.Background = Brush.Parse("Red");
+                        }
+                        else
+                        {
+                            button.Background = Brush.Parse("Green");
                         }
                     }
                     _breakpointPanel.Children.Add(button);
