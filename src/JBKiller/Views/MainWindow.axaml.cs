@@ -25,6 +25,7 @@ namespace JBKiller.Views
         private readonly CheckBox _debugCheck;
         private readonly Button _stopB;
         private readonly Button _runB;
+        private bool debugWarningShowed = false;
         private int debugLine = 0;
         private string openedFilePath;
         private Dictionary<string, string> variablesDict = new();
@@ -83,6 +84,7 @@ namespace JBKiller.Views
             _stopB.IsEnabled = false;
             _runB.Content = "Run";
             _debugCheck.IsEnabled = true;
+            debugWarningShowed = false;
             intepreterDict.Clear();
             variablesDict.Clear();
             PaintBlueBreakpointInRed();
@@ -216,6 +218,11 @@ namespace JBKiller.Views
         {
             var lines = _codeBox.LineCount;
             int childrens = _breakpointPanel.Children.Count;
+            if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed)
+            {
+                _consoleBox.Text += "\nWarning: New code added before current breakpoint will not be executed!";
+                debugWarningShowed = true;
+            }
             if (childrens > lines)
             {
                 _breakpointPanel.Children.RemoveRange(lines, childrens - lines);
