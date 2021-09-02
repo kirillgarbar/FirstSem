@@ -208,7 +208,7 @@ namespace JBKiller.Views
             var ofd = new OpenFileDialog();
             ofd.Filters.Add(new FileDialogFilter() { Name = "Txt", Extensions = { "txt" } });
             var path = await ofd.ShowAsync(this);
-            if (path.Length > 0)
+            if (path != null && path.Length > 0)
             {
                 _codeBox.Text = File.ReadAllText(path[0]);
                 openedFilePath = path[0];
