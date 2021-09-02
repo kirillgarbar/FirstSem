@@ -218,6 +218,7 @@ namespace JBKiller.Views
         {
             var lines = _codeBox.LineCount;
             int childrens = _breakpointPanel.Children.Count;
+            if (!_runB.IsEnabled) _consoleBox.Text = "Interpretation is started! Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
             if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed)
             {
                 _consoleBox.Text += "\nWarning: New code added before current breakpoint will not be executed!";
