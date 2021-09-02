@@ -95,7 +95,7 @@ namespace JBKiller.Views
             {
                 string arrayToString(string[] a) { return String.Join(" ", a.Select(line => line.Trim())); }
                 var line = 0;
-                var codeArray = code.Split("\n");
+                var codeArray = code.Split(Environment.NewLine);
                 foreach (Button butt in _breakpointPanel.Children)
                 {
                     if (line == debugLine && butt.Background == Brush.Parse("Blue"))
