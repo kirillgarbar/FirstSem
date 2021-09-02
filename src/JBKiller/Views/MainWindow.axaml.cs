@@ -142,7 +142,7 @@ namespace JBKiller.Views
                             var res = x.Result;           
                             variablesDict = res.VariablesDictionary;
                             intepreterDict = res.InterpretedDictionary;
-                            _consoleBox.Text += DictToString(variablesDict) + "\nStep of debug is finished!";
+                            _consoleBox.Text += DictToString(variablesDict) + "\nStep of debug is finished!\n";
                             if (debugLine == -1) LeaveDebugMode(new Object(), new RoutedEventArgs());
                         }
                         catch (Exception ex)
@@ -170,7 +170,7 @@ namespace JBKiller.Views
                     {
                         try
                         {
-                            _consoleBox.Text += x.Result + "Interpretation is finished!";
+                            _consoleBox.Text += x.Result + "Interpretation is finished!\n";
                         }
                         catch (Exception ex)
                         {
@@ -218,10 +218,14 @@ namespace JBKiller.Views
         {
             var lines = _codeBox.LineCount;
             int childrens = _breakpointPanel.Children.Count;
-            if (!_runB.IsEnabled && _debugCheck.IsChecked == false) _consoleBox.Text = "Interpretation is started! Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
-            if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed)
+            if (!_runB.IsEnabled)
             {
-                _consoleBox.Text += "\nWarning: New code added before current breakpoint will not be executed!\n";
+                if (_debugCheck.IsChecked == false) _consoleBox.Text = "Interpretation is started! Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
+                else if (_codeBox.TextArea.Caret.Line <= debugLine || debugLine == -1) _consoleBox.Text = "Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
+            }
+            if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed && _runB.IsEnabled)
+            {
+                _consoleBox.Text += "Warning: New code added before current breakpoint will not be executed!\n";
                 debugWarningShowed = true;
             }
             if (childrens > lines)
