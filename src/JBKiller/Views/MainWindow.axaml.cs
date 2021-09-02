@@ -158,6 +158,7 @@ namespace JBKiller.Views
             void executeCode()
             {
                 _runB.IsEnabled = false;
+                _debugCheck.IsEnabled = false;
                 var code = _codeBox.Text;
                 _consoleBox.Text = "Interpretation is started! Please wait for finish...\n";
                 var task = new Task<string>(() =>
@@ -172,6 +173,7 @@ namespace JBKiller.Views
                         try { _consoleBox.Text += x.Result + "Interpretation is finished!\n"; }
                         catch (Exception ex) { _consoleBox.Text = ex.Message; }
                         _runB.IsEnabled = true;
+                        _debugCheck.IsEnabled = true;
                     }));
                 task.Start();
             }
