@@ -143,6 +143,7 @@ namespace JBKiller.Views
                             variablesDict = res.VariablesDictionary;
                             intepreterDict = res.InterpretedDictionary;
                             _consoleBox.Text += DictToString(variablesDict) + "\nStep of debug is finished!\n";
+                            debugWarningShowed = false;
                             if (debugLine == -1) LeaveDebugMode(new Object(), new RoutedEventArgs());
                         }
                         catch (Exception ex)
@@ -168,14 +169,8 @@ namespace JBKiller.Views
                 task.ContinueWith(x =>
                     Dispatcher.UIThread.Post(() =>
                     {
-                        try
-                        {
-                            _consoleBox.Text += x.Result + "Interpretation is finished!\n";
-                        }
-                        catch (Exception ex)
-                        {
-                            _consoleBox.Text = ex.Message;
-                        }
+                        try { _consoleBox.Text += x.Result + "Interpretation is finished!\n"; }
+                        catch (Exception ex) { _consoleBox.Text = ex.Message; }
                         _runB.IsEnabled = true;
                     }));
                 task.Start();
@@ -223,7 +218,7 @@ namespace JBKiller.Views
                 if (_debugCheck.IsChecked == false) _consoleBox.Text = "Interpretation is started! Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
                 else if (_codeBox.TextArea.Caret.Line <= debugLine || debugLine == -1) _consoleBox.Text = "Please wait for finish...\nWarning: Code changes applied after start of execution will not be detected!\n";
             }
-            if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed && _runB.IsEnabled)
+            else if (_codeBox.TextArea.Caret.Line <= debugLine && !debugWarningShowed)
             {
                 _consoleBox.Text += "Warning: New code added before current breakpoint will not be executed!\n";
                 debugWarningShowed = true;
