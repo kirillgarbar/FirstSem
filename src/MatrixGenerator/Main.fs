@@ -18,14 +18,9 @@ module Main =
     let main argv =
         try
             let p = ArgumentParser.Create<CLIArguments>(programName = "FirstSem").ParseCommandLine argv
-            let generator =
-                match p.GetResult(Type) with
-                    | Int -> intGenerator
-                    | Bool -> boolGenerator
-                    | Float -> floatGenerator
             for i in 1..p.GetResult(Number) do
                 let path = p.GetResult(Path) + string Path.DirectorySeparatorChar + string i + ".txt"
-                let m = generateMatrix (p.GetResult(Rows)) (p.GetResult(Cols)) (p.GetResult(Sparsity)) generator
+                let m = generateMatrix (p.GetResult(Rows)) (p.GetResult(Cols)) (p.GetResult(Sparsity)) (p.GetResult(Type))
                 writeMatrix path m
         with
         | ex -> printfn "%s" ex.Message

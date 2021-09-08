@@ -14,24 +14,27 @@ module Generator =
     let intGenerator() = Random().Next(1, 1000) * signGenerator() |> string
     
     let boolGenerator() = "1"
-    
+
     let floatGenerator() =
         let whole = Random().Next(1000) |> string
         let fractional = Random().Next(1000) |> string
         (whole + "." + fractional |> float) * (signGenerator() |> float) |> string
     
-    let generateMatrix rows cols sparcity valueGenerator =
+    let generateMatrix rows cols sparsity t =
         if rows <= 0 || cols <= 0 then failwith "Size should be positive"
-        if sparcity > 100 || sparcity < 0 then failwith "Sparcity should be between 0 and 100"
+        if sparsity > 100 || sparsity < 0 then failwith "Sparcity should be between 0 and 100"
 
-        let mutable nonZeroElementCount = if sparcity = 100 then 0 else rows * cols / (100 / (100 - sparcity))
-        let nonZeroElements = [ for i in 1..nonZeroElementCount -> valueGenerator() ]
-        let resultingArray = Array.init rows (fun _ -> Array.create cols "0")
+        seq {
+            for _ in 1..rows do
+                seq {
+                for _ in 1..cols do
+                    match t with
+                    | Int -> if Random().Next(101) <= sparsity then "0" else intGenerator()
+                    | Bool -> if Random().Next(101) <= sparsity then "0" else boolGenerator()
+                    | Float -> if Random().Next(101) <= sparsity then "0.0" else boolGenerator()
+                }
+        }
 
-        for element in nonZeroElements do
-            resultingArray.[Random().Next(rows)].[Random().Next(cols)] <- element
-        resultingArray
-
-    let writeMatrix path (m:string [][]) =
-        let writeArray = Array.map (String.concat " ") m
-        IO.File.WriteAllLines(path, writeArray)
+    let writeMatrix path m =
+        let writeSeq = Seq.map (String.concat " ") m
+        IO.File.WriteAllLines(path, writeSeq)
