@@ -31,7 +31,7 @@ module Generator =
                     match t with
                     | Int -> if Random().Next(101) <= sparsity then "0" else intGenerator()
                     | Bool -> if Random().Next(101) <= sparsity then "0" else boolGenerator()
-                    | Float -> if Random().Next(101) <= sparsity then "0.0" else boolGenerator()
+                    | Float -> if Random().Next(101) <= sparsity then "0.0" else floatGenerator()
                 }
         }
 
