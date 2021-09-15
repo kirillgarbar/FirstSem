@@ -13,3 +13,18 @@ type SemiRing<'t>  =
 type AlgebraicStruct<'t> =
     | Monoid of Monoid<'t>
     | SemiRing of SemiRing<'t>
+
+    member this.getNeutral =
+        match this with
+        | Monoid m -> m.Neutral
+        | SemiRing s -> s.Monoid.Neutral
+
+    member this.getSumOp =
+        match this with
+        | Monoid m -> m.Sum
+        | SemiRing s -> s.Monoid.Sum
+
+    member this.getMulOp =
+        match this with
+        | Monoid _ -> failwith "Monoid doesn't have a mul operation"
+        | SemiRing s -> s.Mul
