@@ -1,0 +1,15 @@
+﻿<SyntaxDefinition name="Arithm"
+        xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+    <!-- This is the main ruleset. -->
+    <RuleSet>
+        <Keywords fontWeight="bold" foreground="Blue">
+            <Word>print</Word>
+        </Keywords>
+
+        <!-- Digits -->
+        <Rule foreground="DarkBlue">
+            [+-]?([0-9]*[.])?[0-9]+   #number with optional floating point
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>
