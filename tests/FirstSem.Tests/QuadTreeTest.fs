@@ -96,17 +96,17 @@ let testRing = SemiRing sr
 [<Tests>]
 let tests =
     testList "Tests for QuadTreeMatrix" [
-        testProperty "initQT test" <| fun _ ->
-            let cols = System.Random().Next(0, 65)
-            let rows = System.Random().Next(0, 65)
+        testProperty "initQT test" <| fun (a, b) ->
+            let cols = abs a % 64
+            let rows = abs b % 64
             let sm1 = genRandomSparseMatrix cols rows
             let m1 = genMatrixBySparseMatrix sm1
             let r = QuadTreeMatrix.initQTM sm1 |> qtmToSparseMatrix |> genMatrixBySparseMatrix
             Expect.equal m1 r "initQT is wrong"
 
-        testProperty "get/set test" <| fun _ ->
-            let cols = System.Random().Next(1, 65)
-            let rows = System.Random().Next(1, 65)
+        testProperty "get/set test" <| fun (a, b) ->
+            let cols = abs a % 64 + 1
+            let rows = abs b % 64 + 1
             let i = System.Random().Next(0, cols)
             let j = System.Random().Next(0, rows)
             let v = System.Random().Next(0, 100)
@@ -121,9 +121,9 @@ let tests =
                 | _ -> failwith "impossible case"
             Expect.equal v r "get/set is wrong"
           
-        testProperty "sum test" <| fun _ ->
-            let cols = System.Random().Next(1, 65)
-            let rows = System.Random().Next(1, 65)
+        testProperty "sum test" <| fun (a, b) ->
+            let cols = abs a % 64 + 1
+            let rows = abs b % 64 + 1
             let sm1 = genRandomSparseMatrix cols rows
             let sm2 = genRandomSparseMatrix cols rows
             let m1 = genMatrixBySparseMatrix sm1
@@ -148,9 +148,9 @@ let tests =
             let mul2 = QuadTreeMatrix.mul qt1 qt2 testRing
             Expect.equal mul1 mul2 "mul is wrong"
             
-        testProperty "scalarMul test" <| fun _ ->
-            let cols = System.Random().Next(1, 65)
-            let rows = System.Random().Next(1, 65)
+        testProperty "scalarMul test" <| fun (a, b) ->
+            let cols = abs a % 64 + 1
+            let rows = abs b % 64 + 1
             let sm1 = genRandomSparseMatrix cols rows
             let s = System.Random().Next(0, 10)
             let m1 = genMatrixBySparseMatrix sm1
@@ -159,8 +159,8 @@ let tests =
             let mul2 = qt1.scalarMul s testRing
             Expect.equal mul1 mul2 "scalarMul is wrong"
 
-        testProperty "tensorMul test" <| fun _ ->
-            let size = System.Random().Next(0, 16) |> roundToPowerOfTwo
+        testProperty "tensorMul test" <| fun a ->
+            let size = abs a % 16 |> roundToPowerOfTwo
             let sm1 = genRandomSparseMatrix size size
             let sm2 = genRandomSparseMatrix size size
             let m1 = genMatrixBySparseMatrix sm1
