@@ -156,7 +156,7 @@ let tests =
             let m1 = genMatrixBySparseMatrix sm1
             let mul1 = multiplyByScalar s m1 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM
             let qt1 = QuadTreeMatrix.initQTM sm1
-            let mul2 = qt1.scalarMul s testRing
+            let mul2 = scalarMul qt1 s testRing
             Expect.equal mul1 mul2 "scalarMul is wrong"
 
         testProperty "tensorMul test" <| fun a ->
