@@ -21,27 +21,6 @@ type QuadTree<'t when 't : equality> =
     | Leaf of 't
     | Node of QuadTree<'t> * QuadTree<'t> * QuadTree<'t> * QuadTree<'t>
 
-    static member getTree (node:QuadTree<'t>) (dir:Direction) =
-        match node with
-        | Node(nw, ne, se, sw) ->
-            match dir with
-            | NW -> nw
-            | NE -> ne
-            | SE -> se
-            | SW -> sw
-        | None -> None 
-        | _ -> failwith "Node or None expected"
-
-    static member getDirection center (crv:CRV<'t>) =
-        match center with
-        | xNode, yNode ->
-            match crv.Col, crv.Row with
-            | x, y when xNode > x && yNode > y -> NW
-            | x, y when xNode <= x && yNode > y -> NE
-            | x, y when xNode <= x && yNode <= y -> SE
-            | x, y when xNode > x && yNode <= y -> SW
-            | _, _ -> failwith "Impossible case"
-
     member this.placeTree (tree:QuadTree<'t>) (dir:Direction) =
         match this with
         | Node(nw, ne, se, sw) ->
@@ -58,19 +37,40 @@ type QuadTree<'t when 't : equality> =
             | SW -> Node(None, None, None, tree)
         | _ -> failwith "Node or None expected"
 
-    static member getNewCenter center (dir:Direction) squaredSize =
-        match center with
-        | x, y ->
+let private getTree (node:QuadTree<'t>) (dir:Direction) =
+        match node with
+        | Node(nw, ne, se, sw) ->
             match dir with
-            | NW -> (x - squaredSize / 4, y - squaredSize / 4)
-            | NE -> (x + squaredSize / 4, y - squaredSize / 4)
-            | SE -> (x + squaredSize / 4, y + squaredSize / 4)
-            | SW -> (x - squaredSize / 4, y  + squaredSize / 4)
+            | NW -> nw
+            | NE -> ne
+            | SE -> se
+            | SW -> sw
+        | None -> None 
+        | _ -> failwith "Node or None expected"
 
-    static member matchTrees nw ne se sw =
-        match nw, ne, se, sw with
-        | None, None, None, None -> None
-        | _, _, _, _ -> Node(nw, ne, se, sw)
+let private getDirection center (crv:CRV<'t>) =
+    match center with
+    | xNode, yNode ->
+        match crv.Col, crv.Row with
+        | x, y when xNode > x && yNode > y -> NW
+        | x, y when xNode <= x && yNode > y -> NE
+        | x, y when xNode <= x && yNode <= y -> SE
+        | x, y when xNode > x && yNode <= y -> SW
+        | _, _ -> failwith "Impossible case"
+
+let private getNewCenter center (dir:Direction) squaredSize =
+    match center with
+    | x, y ->
+        match dir with
+        | NW -> (x - squaredSize / 4, y - squaredSize / 4)
+        | NE -> (x + squaredSize / 4, y - squaredSize / 4)
+        | SE -> (x + squaredSize / 4, y + squaredSize / 4)
+        | SW -> (x - squaredSize / 4, y  + squaredSize / 4)
+
+let private matchTrees nw ne se sw =
+    match nw, ne, se, sw with
+    | None, None, None, None -> None
+    | _, _, _, _ -> Node(nw, ne, se, sw)
 
 type QuadTreeMatrix<'t when 't : equality> =
     val Cols:int
@@ -93,9 +93,9 @@ type QuadTreeMatrix<'t when 't : equality> =
             match currSize with
             | 1 -> Leaf crv.Value
             | _ ->
-                let dir = QuadTree.getDirection center crv
-                let newCenter = QuadTree<_>.getNewCenter center dir currSize
-                let next = QuadTree.getTree m dir
+                let dir = getDirection center crv
+                let newCenter = getNewCenter center dir currSize
+                let next = getTree m dir
                 m.placeTree (go newCenter next (currSize / 2)) dir
                
         if crv.Col >= this.Cols || crv.Row >= this.Rows then failwith "Index is out of bounds"
@@ -107,8 +107,8 @@ type QuadTreeMatrix<'t when 't : equality> =
             | None -> None
             | Leaf _ -> m
             | Node _ ->
-                let dir = QuadTree.getDirection center (CRV(fst coord, snd coord, 1))
-                go (QuadTree<_>.getNewCenter center dir squaredSize) (QuadTree.getTree m dir) (squaredSize / 2)
+                let dir = getDirection center (CRV(fst coord, snd coord, 1))
+                go (getNewCenter center dir squaredSize) (getTree m dir) (squaredSize / 2)
 
         if fst coord >= this.Cols || snd coord >= this.Rows then failwith "Index is out of bounds"
         else go (this.SquaredSize/2, this.SquaredSize/2) this.Tree this.SquaredSize
@@ -134,7 +134,7 @@ let sum (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
             let ne = go ne1 ne2 
             let se = go se1 se2 
             let sw = go sw1 sw2 
-            QuadTree<_>.matchTrees nw ne se sw
+            matchTrees nw ne se sw
         | _, _ -> failwith "Different sizes of matrices"
 
     QuadTreeMatrix(m1.Cols, m1.Rows, go m1.Tree m2.Tree)
@@ -146,7 +146,7 @@ let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
             then
                 tree
             else
-                go (QuadTree.getTree tree NW) (currentSize / 2)
+                go (getTree tree NW) (currentSize / 2)
     
         if neededSize >= currentSize then tree
         else go tree currentSize
@@ -175,7 +175,7 @@ let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
             let ne = sum (QuadTreeMatrix(currSize, currSize, go nw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go ne1 se2 (currSize/2))) astruct
             let se = sum (QuadTreeMatrix(currSize, currSize, go sw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go se1 se2 (currSize/2))) astruct
             let sw = sum (QuadTreeMatrix(currSize, currSize, go sw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go se1 sw2 (currSize/2))) astruct
-            QuadTree<_>.matchTrees nw.Tree ne.Tree se.Tree sw.Tree
+            matchTrees nw.Tree ne.Tree se.Tree sw.Tree
         | _, _ -> failwith "Different sizes of matrices"
 
     if m1.Cols <> m2.Rows
@@ -198,7 +198,7 @@ let scalarMul (m:QuadTreeMatrix<'t>) s (astruct:AlgebraicStruct<'t>) =
              let ne = go ne 
              let se = go se 
              let sw = go sw 
-             QuadTree<_>.matchTrees nw ne se sw
+             matchTrees nw ne se sw
 
      QuadTreeMatrix(m.Cols, m.Rows, if s = neutral then None else go m.Tree)
 
@@ -212,7 +212,7 @@ let tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:Algebraic
             let ne = go ne
             let se = go se
             let sw = go sw
-            QuadTree<_>.matchTrees nw ne se sw
+            matchTrees nw ne se sw
 
     let t =
         match m1.Tree, m2.Tree with
