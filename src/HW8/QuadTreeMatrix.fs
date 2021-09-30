@@ -48,10 +48,10 @@ let private getTree (node:QuadTree<'t>) (dir:Direction) =
         | None -> None 
         | _ -> failwith "Node or None expected"
 
-let private getDirection center (crv:CRV<'t>) =
+let private getDirection center colRow =
     match center with
     | xNode, yNode ->
-        match crv.Col, crv.Row with
+        match colRow with
         | x, y when xNode > x && yNode > y -> NW
         | x, y when xNode <= x && yNode > y -> NE
         | x, y when xNode <= x && yNode <= y -> SE
@@ -76,9 +76,10 @@ type QuadTreeMatrix<'t when 't : equality> =
     val Cols:int
     val Rows:int
     val SquaredSize:int
+    val AlgebraicStruct:AlgebraicStruct<'t>
     val mutable Tree:QuadTree<'t>
 
-    new(c, r, t) = { Cols = c; Rows = r; SquaredSize = getSquaredSize c r ; Tree = t }
+    new(c, r, a, t) = { Cols = c; Rows = r; SquaredSize = getSquaredSize c r ; AlgebraicStruct = a; Tree = t }
 
     override this.GetHashCode() =
         hash (this.Cols, this.Rows, this.Tree)
@@ -88,40 +89,40 @@ type QuadTreeMatrix<'t when 't : equality> =
         | :? QuadTreeMatrix<'t> as t -> this.Tree = t.Tree && this.Cols = t.Cols && this.Rows = t.Rows
         | _ -> false
 
-    member this.set (crv:CRV<'t>) =          
-        let rec go center m currSize =           
-            match currSize with
-            | 1 -> Leaf crv.Value
-            | _ ->
-                let dir = getDirection center crv
-                let newCenter = getNewCenter center dir currSize
-                let next = getTree m dir
-                m.placeTree (go newCenter next (currSize / 2)) dir
-               
-        if crv.Col >= this.Cols || crv.Row >= this.Rows then failwith "Index is out of bounds"
-        else this.Tree <- go (this.SquaredSize/2, this.SquaredSize/2) this.Tree this.SquaredSize
+    member this.Item
+        with get (col, row) =
+            let rec go center m squaredSize =
+                match m with
+                | None -> None
+                | Leaf _ -> m
+                | Node _ ->
+                    let dir = getDirection center (col, row)
+                    go (getNewCenter center dir squaredSize) (getTree m dir) (squaredSize / 2)
 
-    member this.get coord =
-        let rec go center m squaredSize =
-            match m with
-            | None -> None
-            | Leaf _ -> m
-            | Node _ ->
-                let dir = getDirection center (CRV(fst coord, snd coord, 1))
-                go (getNewCenter center dir squaredSize) (getTree m dir) (squaredSize / 2)
+            if col >= this.Cols || row >= this.Rows then failwith "Index is out of bounds"
+            else go (this.SquaredSize/2, this.SquaredSize/2) this.Tree this.SquaredSize
+        and set (col, row) value =
+            let rec go center m currSize =           
+                match currSize with
+                | 1 -> Leaf value
+                | _ ->
+                    let dir = getDirection center (col, row)
+                    let newCenter = getNewCenter center dir currSize
+                    let next = getTree m dir
+                    m.placeTree (go newCenter next (currSize / 2)) dir
+                   
+            if col >= this.Cols || row >= this.Rows then failwith "Index is out of bounds"
+            else this.Tree <- go (this.SquaredSize/2, this.SquaredSize/2) this.Tree this.SquaredSize
 
-        if fst coord >= this.Cols || snd coord >= this.Rows then failwith "Index is out of bounds"
-        else go (this.SquaredSize/2, this.SquaredSize/2) this.Tree this.SquaredSize
-
-let initQTM (m:SparseMatrix<'t>) =
-    if m.List.Length = 0 then QuadTreeMatrix(m.Cols, m.Rows, None)
+let initQTM algStr (m:SparseMatrix<'t>) =
+    if m.List.Length = 0 then QuadTreeMatrix(m.Cols, m.Rows, algStr, None)
     else
-        let matrix = QuadTreeMatrix(m.Cols, m.Rows, Node(None, None, None, None))
-        List.iter (matrix.set) m.List
+        let matrix = QuadTreeMatrix(m.Cols, m.Rows, algStr, Node(None, None, None, None))
+        List.iter (fun (crv:CRV<'t>) -> matrix.[crv.Col, crv.Row] <- crv.Value) m.List
         matrix
 
-let sum (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct<'t>) =
-    let sumOp, neutral = astruct.getSumOp, astruct.getNeutral
+let sum (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) =
+    let sumOp, neutral = m1.AlgebraicStruct.getSumOp, m1.AlgebraicStruct.getNeutral
     let rec go m1 m2 = 
         match m1, m2 with
         | Leaf x , Leaf y ->
@@ -137,9 +138,16 @@ let sum (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
             matchTrees nw ne se sw
         | _, _ -> failwith "Different sizes of matrices"
 
-    QuadTreeMatrix(m1.Cols, m1.Rows, go m1.Tree m2.Tree)
+    if (m1.Cols, m1.Rows) <> (m2.Cols, m2.Rows)
+    then
+        failwith "Wrong size of matrices"
+    else if m1.AlgebraicStruct <> m2.AlgebraicStruct
+    then
+        failwith "Algebraic structures must be the same"
+    else
+        QuadTreeMatrix(m1.Cols, m1.Rows, m1.AlgebraicStruct, go m1.Tree m2.Tree)
 
-let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct<'t>) =
+let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) =
     let reduceToSize tree neededSize currentSize =
         let rec go tree currentSize =
             if neededSize = currentSize
@@ -162,7 +170,7 @@ let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
         if neededSize <= currentSize then tree
         else go tree currentSize
 
-    let mulOp, neutral = astruct.getMulOp, astruct.getNeutral
+    let mulOp, neutral, alSt = m1.AlgebraicStruct.getMulOp, m1.AlgebraicStruct.getNeutral, m1.AlgebraicStruct
     let rec go (m1:QuadTree<'t>) (m2:QuadTree<'t>) currSize =
         match m1, m2 with
         | Leaf x, Leaf y ->
@@ -171,24 +179,27 @@ let mul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct
         | None, _ -> None
         | _, None -> None
         | Node(nw1, ne1, se1, sw1), Node(nw2, ne2, se2, sw2) ->
-            let nw = sum (QuadTreeMatrix(currSize, currSize, go nw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go ne1 sw2 (currSize/2))) astruct
-            let ne = sum (QuadTreeMatrix(currSize, currSize, go nw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go ne1 se2 (currSize/2))) astruct
-            let se = sum (QuadTreeMatrix(currSize, currSize, go sw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go se1 se2 (currSize/2))) astruct
-            let sw = sum (QuadTreeMatrix(currSize, currSize, go sw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, go se1 sw2 (currSize/2))) astruct
+            let nw = sum (QuadTreeMatrix(currSize, currSize, alSt, go nw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, alSt, go ne1 sw2 (currSize/2)))
+            let ne = sum (QuadTreeMatrix(currSize, currSize, alSt, go nw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, alSt, go ne1 se2 (currSize/2)))
+            let se = sum (QuadTreeMatrix(currSize, currSize, alSt, go sw1 ne2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, alSt, go se1 se2 (currSize/2)))
+            let sw = sum (QuadTreeMatrix(currSize, currSize, alSt, go sw1 nw2 (currSize/2))) (QuadTreeMatrix(currSize, currSize, alSt, go se1 sw2 (currSize/2)))
             matchTrees nw.Tree ne.Tree se.Tree sw.Tree
         | _, _ -> failwith "Different sizes of matrices"
 
     if m1.Cols <> m2.Rows
     then
         failwith "Wrong size of matrices"
+    else if m1.AlgebraicStruct <> m2.AlgebraicStruct
+    then
+        failwith "Algebraic structures must be the same"
     else
         let currentSquaredSize = max m1.SquaredSize m2.SquaredSize
         let oversizedTree = go (increaseToSize m1.Tree currentSquaredSize m1.SquaredSize) (increaseToSize m2.Tree currentSquaredSize m2.SquaredSize) (currentSquaredSize / 2)
         let tree = reduceToSize oversizedTree (getSquaredSize m2.Cols m1.Rows) currentSquaredSize
-        QuadTreeMatrix(m2.Cols, m1.Rows, tree)
+        QuadTreeMatrix(m2.Cols, m1.Rows, m1.AlgebraicStruct, tree)
 
-let scalarMul (m:QuadTreeMatrix<'t>) s (astruct:AlgebraicStruct<'t>) =
-     let mulOp, neutral = astruct.getMulOp, astruct.getNeutral
+let scalarMul (m:QuadTreeMatrix<'t>) (s:'t) =
+     let mulOp, neutral = m.AlgebraicStruct.getMulOp, m.AlgebraicStruct.getNeutral
      let rec go m =
          match m with
          | Leaf x -> Leaf (mulOp s x)
@@ -200,12 +211,12 @@ let scalarMul (m:QuadTreeMatrix<'t>) s (astruct:AlgebraicStruct<'t>) =
              let sw = go sw 
              matchTrees nw ne se sw
 
-     QuadTreeMatrix(m.Cols, m.Rows, if s = neutral then None else go m.Tree)
+     QuadTreeMatrix(m.Cols, m.Rows, m.AlgebraicStruct, if s = neutral then None else go m.Tree)
 
-let tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:AlgebraicStruct<'t>) =
+let tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) =
     let rec go m1 =
         match m1 with
-        | Leaf x -> (scalarMul m2 x astruct).Tree
+        | Leaf x -> (scalarMul m2 x).Tree
         | None -> None
         | Node(nw, ne, se, sw) ->
             let nw = go nw
@@ -214,8 +225,13 @@ let tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) (astruct:Algebraic
             let sw = go sw
             matchTrees nw ne se sw
 
-    let t =
-        match m1.Tree, m2.Tree with
-        | None, _ | _, None -> None
-        | _, _ -> go m1.Tree
-    QuadTreeMatrix(m1.SquaredSize * m2.SquaredSize, m1.SquaredSize * m2.SquaredSize, t)
+    if m1.Rows = m1.Cols && m1.SquaredSize = roundToPowerOfTwo m1.SquaredSize
+    
+    then
+        let t =
+            match m1.Tree, m2.Tree with
+            | None, _ | _, None -> None
+            | _, _ -> go m1.Tree
+        QuadTreeMatrix(m1.SquaredSize * m2.SquaredSize, m1.SquaredSize * m2.SquaredSize, m1.AlgebraicStruct, t)
+    else
+        failwith "Size of matrices should be the power of two"

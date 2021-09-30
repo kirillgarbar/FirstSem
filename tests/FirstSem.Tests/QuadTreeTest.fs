@@ -82,7 +82,7 @@ let qtmToSparseMatrix (x:QuadTreeMatrix<int>) =
     let mutable c = 0
     for i in 0 .. x.Cols - 1 do
         for j in 0 .. x.Rows - 1 do
-            let y = x.get (i, j)
+            let y = x.[i, j]
             match y with
             | Leaf x ->
                 a.[c] <- (CRV(i, j, x))
@@ -101,7 +101,7 @@ let tests =
             let rows = abs b % 64
             let sm1 = genRandomSparseMatrix cols rows
             let m1 = genMatrixBySparseMatrix sm1
-            let r = QuadTreeMatrix.initQTM sm1 |> qtmToSparseMatrix |> genMatrixBySparseMatrix
+            let r = QuadTreeMatrix.initQTM testRing sm1 |> qtmToSparseMatrix |> genMatrixBySparseMatrix
             Expect.equal m1 r "initQT is wrong"
 
         testProperty "get/set test" <| fun (a, b) ->
@@ -111,9 +111,9 @@ let tests =
             let j = System.Random().Next(0, rows)
             let v = System.Random().Next(0, 100)
             let sm1 = genRandomSparseMatrix cols rows
-            let t = QuadTreeMatrix.initQTM sm1
-            t.set (CRV(i, j, v))
-            let g = t.get (i, j)
+            let t = QuadTreeMatrix.initQTM testRing sm1
+            t.[i, j] <- v
+            let g = t.[i, j]
             let r = 
                 match g with
                 | None -> v - 1
@@ -128,10 +128,10 @@ let tests =
             let sm2 = genRandomSparseMatrix cols rows
             let m1 = genMatrixBySparseMatrix sm1
             let m2 = genMatrixBySparseMatrix sm2
-            let sum1 = sumMat m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM
-            let qt1 = QuadTreeMatrix.initQTM sm1
-            let qt2 = QuadTreeMatrix.initQTM sm2
-            let sum2 = QuadTreeMatrix.sum qt1 qt2 testRing
+            let sum1 = sumMat m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM testRing
+            let qt1 = QuadTreeMatrix.initQTM testRing sm1
+            let qt2 = QuadTreeMatrix.initQTM testRing sm2
+            let sum2 = QuadTreeMatrix.sum qt1 qt2
             Expect.equal sum1 sum2 "sum is wrong"
 
         testProperty "mul test" <| fun (a, b, c) ->
@@ -142,10 +142,10 @@ let tests =
             let sm2 = genRandomSparseMatrix thirdDim firstDim
             let m1 = genMatrixBySparseMatrix sm1
             let m2 = genMatrixBySparseMatrix sm2
-            let mul1 = mulMat m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM
-            let qt1 = QuadTreeMatrix.initQTM sm1
-            let qt2 = QuadTreeMatrix.initQTM sm2
-            let mul2 = QuadTreeMatrix.mul qt1 qt2 testRing
+            let mul1 = mulMat m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM testRing
+            let qt1 = QuadTreeMatrix.initQTM testRing sm1
+            let qt2 = QuadTreeMatrix.initQTM testRing sm2
+            let mul2 = QuadTreeMatrix.mul qt1 qt2
             Expect.equal mul1 mul2 "mul is wrong"
             
         testProperty "scalarMul test" <| fun (a, b, c) ->
@@ -154,9 +154,9 @@ let tests =
             let sm1 = genRandomSparseMatrix cols rows
             let s = abs c % 10 
             let m1 = genMatrixBySparseMatrix sm1
-            let mul1 = multiplyByScalar s m1 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM
-            let qt1 = QuadTreeMatrix.initQTM sm1
-            let mul2 = scalarMul qt1 s testRing
+            let mul1 = multiplyByScalar s m1 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM testRing
+            let qt1 = QuadTreeMatrix.initQTM testRing sm1
+            let mul2 = scalarMul qt1 s
             Expect.equal mul1 mul2 "scalarMul is wrong"
 
         testProperty "tensorMul test" <| fun a ->
@@ -165,10 +165,10 @@ let tests =
             let sm2 = genRandomSparseMatrix size size
             let m1 = genMatrixBySparseMatrix sm1
             let m2 = genMatrixBySparseMatrix sm2
-            let mul1 = tensor m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM
-            let qt1 = QuadTreeMatrix.initQTM sm1
-            let qt2 = QuadTreeMatrix.initQTM sm2
-            let mul2 = QuadTreeMatrix.tensorMul qt1 qt2 testRing
+            let mul1 = tensor m1 m2 |> array2DToSparseMatrix |> QuadTreeMatrix.initQTM testRing
+            let qt1 = QuadTreeMatrix.initQTM testRing sm1
+            let qt2 = QuadTreeMatrix.initQTM testRing sm2
+            let mul2 = QuadTreeMatrix.tensorMul qt1 qt2
             Expect.equal mul1 mul2 "tensorMul is wrong"
 
     ]
