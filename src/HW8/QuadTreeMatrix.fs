@@ -226,7 +226,7 @@ let tensorMul (m1:QuadTreeMatrix<'t>) (m2:QuadTreeMatrix<'t>) =
             matchTrees nw ne se sw
 
     if m1.Rows = m1.Cols && m1.SquaredSize = roundToPowerOfTwo m1.SquaredSize
-    
+        && m2.Rows = m2.Cols && m2.SquaredSize = roundToPowerOfTwo m2.SquaredSize
     then
         let t =
             match m1.Tree, m2.Tree with
